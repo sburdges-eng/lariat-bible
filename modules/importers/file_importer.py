@@ -372,6 +372,117 @@ class FileImporter:
 
         return result
 
+    # ==================== BEO / CATERING EVENT IMPORT ====================
+
+    def import_beo(
+        self,
+        file_path: str,
+        sheet_name: Optional[str] = None
+    ) -> Dict:
+        """
+        Import Banquet Event Order (BEO) from CSV or Excel
+
+        Args:
+            file_path: Path to BEO file
+            sheet_name: Sheet name for Excel files
+
+        Returns:
+            Dict with BEO data and totals
+        """
+        print(f"📋 Importing BEO/Catering Event from {file_path}")
+
+        df = self.read_file(file_path, sheet_name)
+
+        # Required columns for BEO
+        required = ['event_name', 'event_date', 'guest_count', 'customer_name', 'customer_phone']
+
+        validation = self.validate_columns(df, required)
+
+        if not validation['valid']:
+            return {
+                'success': False,
+                'error': validation['message']
+            }
+
+        # Process each BEO
+        events = []
+        errors = []
+
+        for idx, row in df.iterrows():
+            try:
+                event = {
+                    'event_name': str(row['event_name']).strip(),
+                    'event_type': str(row.get('event_type', 'Catering')).strip() if 'event_type' in row and pd.notna(row.get('event_type')) else 'Catering',
+                    'event_date': str(row['event_date']).strip(),
+                    'start_time': str(row.get('start_time', '12:00 PM')).strip() if 'start_time' in row and pd.notna(row.get('start_time')) else '12:00 PM',
+                    'end_time': str(row.get('end_time', '4:00 PM')).strip() if 'end_time' in row and pd.notna(row.get('end_time')) else '4:00 PM',
+                    'guest_count': int(row['guest_count']),
+
+                    # Customer info
+                    'customer_name': str(row['customer_name']).strip(),
+                    'customer_phone': str(row['customer_phone']).strip(),
+                    'customer_email': str(row.get('customer_email', '')).strip() if 'customer_email' in row and pd.notna(row.get('customer_email')) else '',
+
+                    # Venue info
+                    'venue_name': str(row.get('venue_name', 'The Lariat')).strip() if 'venue_name' in row and pd.notna(row.get('venue_name')) else 'The Lariat',
+                    'venue_location': str(row.get('venue_location', 'Fort Collins, CO')).strip() if 'venue_location' in row and pd.notna(row.get('venue_location')) else 'Fort Collins, CO',
+
+                    # Menu/Food info
+                    'menu_selection': str(row.get('menu_selection', '')).strip() if 'menu_selection' in row and pd.notna(row.get('menu_selection')) else '',
+                    'special_requests': str(row.get('special_requests', '')).strip() if 'special_requests' in row and pd.notna(row.get('special_requests')) else '',
+                    'dietary_restrictions': str(row.get('dietary_restrictions', '')).strip() if 'dietary_restrictions' in row and pd.notna(row.get('dietary_restrictions')) else '',
+
+                    # Pricing
+                    'price_per_person': float(row.get('price_per_person', 0)) if 'price_per_person' in row and pd.notna(row.get('price_per_person')) else 0.0,
+                    'venue_fee': float(row.get('venue_fee', 0)) if 'venue_fee' in row and pd.notna(row.get('venue_fee')) else 0.0,
+                    'service_fee': float(row.get('service_fee', 0)) if 'service_fee' in row and pd.notna(row.get('service_fee')) else 0.0,
+                    'gratuity': float(row.get('gratuity', 0)) if 'gratuity' in row and pd.notna(row.get('gratuity')) else 0.0,
+                    'deposit_paid': float(row.get('deposit_paid', 0)) if 'deposit_paid' in row and pd.notna(row.get('deposit_paid')) else 0.0,
+
+                    # Status
+                    'status': str(row.get('status', 'Pending')).strip().upper() if 'status' in row and pd.notna(row.get('status')) else 'PENDING',
+                    'approved': row.get('approved', 0) if 'approved' in row and pd.notna(row.get('approved')) else 0,
+
+                    # Additional services
+                    'setup_instructions': str(row.get('setup_instructions', '')).strip() if 'setup_instructions' in row and pd.notna(row.get('setup_instructions')) else '',
+                    'equipment_needed': str(row.get('equipment_needed', '')).strip() if 'equipment_needed' in row and pd.notna(row.get('equipment_needed')) else '',
+                    'staff_required': int(row.get('staff_required', 0)) if 'staff_required' in row and pd.notna(row.get('staff_required')) else 0,
+
+                    # Timestamps
+                    'created_date': datetime.now(),
+                    'last_modified': datetime.now()
+                }
+
+                # Calculate total cost
+                subtotal = (event['price_per_person'] * event['guest_count']) + event['venue_fee']
+                event['subtotal'] = subtotal
+                event['total_cost'] = subtotal + event['service_fee'] + event['gratuity']
+                event['balance_due'] = event['total_cost'] - event['deposit_paid']
+
+                events.append(event)
+
+            except Exception as e:
+                errors.append(f"Row {idx+2}: {str(e)}")
+
+        result = {
+            'success': True,
+            'total_rows': len(df),
+            'events_imported': len(events),
+            'errors': errors,
+            'error_count': len(errors),
+            'events': events,
+            'total_revenue': sum(e['total_cost'] for e in events),
+            'total_guests': sum(e['guest_count'] for e in events)
+        }
+
+        print(f"✅ Imported {len(events)} BEO/Catering events")
+        print(f"   Total guests: {result['total_guests']}")
+        print(f"   Total revenue: ${result['total_revenue']:,.2f}")
+        if errors:
+            print(f"⚠️  {len(errors)} errors occurred")
+
+        return result
+
     # ==================== EXPORT TEMPLATES ====================
 
     def create_import_templates(self, output_dir: str = 'data/templates'):
@@ -435,11 +546,41 @@ class FileImporter:
         })
         menu_template.to_csv(f'{output_dir}/menu_items_template.csv', index=False)
 
+        # BEO / Catering Event Template
+        beo_template = pd.DataFrame({
+            'Event Name': ['Corporate Lunch', 'Birthday Party', 'Wedding Reception'],
+            'Event Type': ['Corporate', 'Birthday', 'Wedding'],
+            'Event Date': ['2025-02-15', '2025-03-10', '2025-04-20'],
+            'Start Time': ['11:30 AM', '6:00 PM', '5:00 PM'],
+            'End Time': ['2:00 PM', '10:00 PM', '11:00 PM'],
+            'Guest Count': [50, 25, 150],
+            'Customer Name': ['John Smith', 'Sarah Johnson', 'Mike & Emily Davis'],
+            'Customer Phone': ['970-555-1234', '970-555-5678', '970-555-9012'],
+            'Customer Email': ['john@company.com', 'sarah@email.com', 'mike@email.com'],
+            'Venue Name': ['The Lariat', 'The Lariat - Private Room', 'The Lariat - Full Venue'],
+            'Venue Location': ['Fort Collins, CO', 'Fort Collins, CO', 'Fort Collins, CO'],
+            'Menu Selection': ['BBQ Buffet', 'Taco Bar', 'Premium Dinner Service'],
+            'Special Requests': ['Vegetarian option for 5', 'Birthday cake table', 'Outdoor ceremony space'],
+            'Dietary Restrictions': ['2 Gluten-Free, 5 Vegetarian', '1 Vegan', '10 Vegetarian, 3 Gluten-Free'],
+            'Price Per Person': [25.00, 22.00, 45.00],
+            'Venue Fee': [500.00, 250.00, 2000.00],
+            'Service Fee': [125.00, 75.00, 500.00],
+            'Gratuity': [250.00, 137.50, 1350.00],
+            'Deposit Paid': [500.00, 200.00, 2000.00],
+            'Status': ['CONFIRMED', 'PENDING', 'CONFIRMED'],
+            'Approved': [1, 0, 1],
+            'Setup Instructions': ['Round tables of 8', 'U-shaped seating', 'Head table for wedding party'],
+            'Equipment Needed': ['Projector, Microphone', 'Sound system', 'DJ setup area, dance floor'],
+            'Staff Required': [3, 2, 8]
+        })
+        beo_template.to_csv(f'{output_dir}/beo_catering_events_template.csv', index=False)
+
         print(f"✅ Created templates in {output_dir}/")
         print(f"   - vendor_order_guide_template.csv")
         print(f"   - invoice_template.csv")
         print(f"   - recipe_template.csv")
         print(f"   - menu_items_template.csv")
+        print(f"   - beo_catering_events_template.csv")
 
         return output_dir
 
@@ -457,6 +598,7 @@ if __name__ == "__main__":
         importer.create_import_templates('data/templates')
         print("\n📝 Templates created! Fill them out and import with:")
         print("   python -m modules.importers.file_importer import vendor data/sysco.csv SYSCO")
+        print("   python -m modules.importers.file_importer import beo data/catering_events.csv")
         sys.exit(0)
 
     command = sys.argv[1]
@@ -479,9 +621,12 @@ if __name__ == "__main__":
         elif import_type == 'menu':
             result = importer.import_menu_items(file_path)
 
+        elif import_type == 'beo' or import_type == 'events':
+            result = importer.import_beo(file_path)
+
         else:
             print(f"Unknown import type: {import_type}")
-            print("Usage: python file_importer.py import [vendor|invoice|recipes|menu] <file_path> [vendor_name]")
+            print("Usage: python file_importer.py import [vendor|invoice|recipes|menu|beo] <file_path> [vendor_name]")
             sys.exit(1)
 
         if result['success']:
