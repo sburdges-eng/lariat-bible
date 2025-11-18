@@ -25,14 +25,15 @@ class CorrectedVendorComparison:
     
     def interpret_pack_size(self, pack_str: str) -> Dict:
         """
-        Correctly interpret pack sizes
+        Correctly interpret pack sizes based on ACTUAL vendor formats
         
         Rules:
-        - #10 = standard can (109 oz) ONLY if dimensions match
-        - # without standard can size = pounds
-        - 6/10# = 6 containers × 10 pounds = 60 lbs total
-        - 6/#10 = 6 × #10 cans = 654 oz total
+        - Shamrock: 1/6/LB = 1 container of 6 lbs
+        - SYSCO: 3/6LB = 3 containers of 6 lbs each = 18 lbs total
+        - #10 = standard can (109 oz) ONLY with specific dimensions
+        - Simple: 25 LB = 25 pounds total
         """
+        import re
         pack_str = str(pack_str).upper().strip()
         
         # Dictionary to store parsed results
@@ -40,82 +41,75 @@ class CorrectedVendorComparison:
             'original': pack_str,
             'total_pounds': None,
             'total_ounces': None,
-            'count': 1,
-            'unit_size': None,
+            'containers': 1,
+            'pounds_per_container': None,
             'unit_type': None
         }
         
+        # SHAMROCK FORMAT: 1/6/LB or similar (containers/pounds/LB)
+        shamrock_match = re.match(r'(\d+)/(\d+)/LB', pack_str)
+        if shamrock_match:
+            containers = int(shamrock_match.group(1))
+            pounds_per = int(shamrock_match.group(2))
+            result['containers'] = containers
+            result['pounds_per_container'] = pounds_per
+            result['unit_type'] = 'LB'
+            result['total_pounds'] = containers * pounds_per
+            result['total_ounces'] = containers * pounds_per * 16
+            return result
+        
+        # SYSCO FORMAT: 3/6LB or 3/6# (containers/pounds each)
+        sysco_match = re.match(r'(\d+)/(\d+)(LB|#)', pack_str)
+        if sysco_match:
+            containers = int(sysco_match.group(1))
+            pounds_per = int(sysco_match.group(2))
+            result['containers'] = containers
+            result['pounds_per_container'] = pounds_per
+            result['unit_type'] = 'LB'
+            result['total_pounds'] = containers * pounds_per
+            result['total_ounces'] = containers * pounds_per * 16
+            return result
+        
         # Check for #10 can specifically (standard can size)
-        if '/#10' in pack_str and not '/10#' in pack_str:
-            # This is cans, not pounds
-            try:
-                count = int(pack_str.split('/')[0])
-                result['count'] = count
-                result['unit_size'] = 109
-                result['unit_type'] = 'OZ'
-                result['total_ounces'] = count * 109
-                result['total_pounds'] = (count * 109) / 16
-            except:
-                pass
-        
-        # Check for X/Y# pattern (this means pounds, not cans)
-        elif '#' in pack_str and '/' in pack_str:
-            parts = pack_str.replace('#', '').split('/')
-            if len(parts) == 2:
-                try:
-                    count = int(parts[0])
-                    pounds = int(parts[1])
-                    result['count'] = count
-                    result['unit_size'] = pounds
-                    result['unit_type'] = 'LB'
-                    result['total_pounds'] = count * pounds
-                    result['total_ounces'] = count * pounds * 16
-                except:
-                    pass
-        
-        # Simple pounds (25 LB, 50 LB, etc.)
-        elif 'LB' in pack_str:
-            import re
-            match = re.search(r'(\d+)\s*LB', pack_str)
-            if match:
-                pounds = int(match.group(1))
-                result['count'] = 1
-                result['unit_size'] = pounds
-                result['unit_type'] = 'LB'
-                result['total_pounds'] = pounds
-                result['total_ounces'] = pounds * 16
-        
-        # Gallons
-        elif 'GAL' in pack_str:
-            import re
-            # Check for X/Y GAL pattern
-            match = re.search(r'(\d+)/(\d+)\s*GAL', pack_str)
+        if '/#10' in pack_str:
+            match = re.match(r'(\d+)/#10', pack_str)
             if match:
                 count = int(match.group(1))
-                gallons = int(match.group(2))
-                result['count'] = count
-                result['unit_size'] = gallons
-                result['unit_type'] = 'GAL'
-                result['total_ounces'] = count * gallons * 128
-                # Don't convert liquid to pounds
-            else:
-                # Single gallon
-                match = re.search(r'(\d+)\s*GAL', pack_str)
-                if match:
-                    gallons = int(match.group(1))
-                    result['count'] = 1
-                    result['unit_size'] = gallons
-                    result['unit_type'] = 'GAL'
-                    result['total_ounces'] = gallons * 128
+                result['containers'] = count
+                result['unit_type'] = 'CAN#10'
+                result['total_ounces'] = count * 109
+                result['total_pounds'] = (count * 109) / 16
+                return result
+        
+        # Simple pounds (25 LB, 50 LB, etc.)
+        simple_lb = re.match(r'(\d+)\s*LB', pack_str)
+        if simple_lb:
+            pounds = int(simple_lb.group(1))
+            result['containers'] = 1
+            result['pounds_per_container'] = pounds
+            result['unit_type'] = 'LB'
+            result['total_pounds'] = pounds
+            result['total_ounces'] = pounds * 16
+            return result
+        
+        # Gallons
+        gal_match = re.match(r'(\d+)/(\d+)\s*GAL', pack_str)
+        if gal_match:
+            containers = int(gal_match.group(1))
+            gallons = int(gal_match.group(2))
+            result['containers'] = containers
+            result['unit_type'] = 'GAL'
+            result['total_ounces'] = containers * gallons * 128
+            return result
         
         # Cases/Each
-        elif any(unit in pack_str for unit in ['CS', 'CASE', 'EA', 'EACH']):
-            import re
+        if any(unit in pack_str for unit in ['CS', 'CASE', 'EA', 'EACH']):
             match = re.search(r'(\d+)', pack_str)
             if match:
                 count = int(match.group(1))
-                result['count'] = count
+                result['containers'] = count
                 result['unit_type'] = 'EACH'
+                return result
         
         return result
     
@@ -145,23 +139,34 @@ class CorrectedVendorComparison:
     
     def compare_items(self, item_name: str, 
                      sysco_pack: str, sysco_price: float,
-                     shamrock_pack: str, shamrock_price: float) -> Dict:
+                     shamrock_pack: str, shamrock_price: float,
+                     sysco_split_price: float = None) -> Dict:
         """
         Compare prices between vendors with correct pack size interpretation
+        Including split pricing when available
         """
         # Calculate price per pound for each
         sysco_per_lb = self.calculate_price_per_unit(sysco_pack, sysco_price, 'LB')
         shamrock_per_lb = self.calculate_price_per_unit(shamrock_pack, shamrock_price, 'LB')
         
+        # Calculate split price per pound if provided
+        sysco_split_per_lb = None
+        if sysco_split_price:
+            parsed = self.interpret_pack_size(sysco_pack)
+            if parsed['pounds_per_container']:
+                sysco_split_per_lb = sysco_split_price / parsed['pounds_per_container']
+        
         if sysco_per_lb and shamrock_per_lb:
             savings_per_lb = sysco_per_lb - shamrock_per_lb
             savings_pct = (savings_per_lb / sysco_per_lb) * 100 if sysco_per_lb > 0 else 0
             
-            return {
+            result = {
                 'item': item_name,
                 'sysco_pack': sysco_pack,
                 'sysco_case_price': sysco_price,
                 'sysco_per_lb': sysco_per_lb,
+                'sysco_split_price': sysco_split_price,
+                'sysco_split_per_lb': sysco_split_per_lb,
                 'shamrock_pack': shamrock_pack,
                 'shamrock_case_price': shamrock_price,
                 'shamrock_per_lb': shamrock_per_lb,
@@ -170,6 +175,14 @@ class CorrectedVendorComparison:
                 'preferred_vendor': 'Shamrock' if shamrock_per_lb < sysco_per_lb else 'SYSCO',
                 'monthly_savings_estimate': savings_per_lb * 10  # Assume 10 lbs/month usage
             }
+            
+            # Compare with split pricing too
+            if sysco_split_per_lb:
+                split_savings = sysco_split_per_lb - shamrock_per_lb
+                result['split_vs_shamrock_savings'] = split_savings
+                result['split_savings_pct'] = (split_savings / sysco_split_per_lb) * 100 if sysco_split_per_lb > 0 else 0
+            
+            return result
         
         return None
     
@@ -177,15 +190,15 @@ class CorrectedVendorComparison:
         """
         Recalculate the spice savings with CORRECT pack size interpretation
         """
-        # Real examples from your data (CORRECTED)
+        # Real examples from your data (ACTUALLY CORRECTED)
         spice_comparisons = [
             # Item, SYSCO pack, SYSCO price, Shamrock pack, Shamrock price
-            ("Black Pepper Ground", "6/1#", 295.89, "25 LB", 95.88),
-            ("Black Pepper Coarse", "6/1#", 298.95, "25 LB", 79.71),
-            ("Black Pepper Cracked", "6/1#", 269.99, "25 LB", 76.90),
-            ("Garlic Powder", "6/1#", 213.99, "50 LB", 54.26),
-            ("Onion Powder", "6/1#", 148.95, "25 LB", 39.80),
-            ("Garlic Granulated", "5/1#", 165.99, "25 LB", 67.47),
+            ("Garlic Powder", "3/6LB", 213.19, "1/6/LB", 54.26),
+            ("Black Pepper Ground", "6/1LB", 295.89, "25 LB", 95.88),
+            ("Black Pepper Coarse", "6/1LB", 298.95, "25 LB", 79.71),
+            ("Black Pepper Cracked", "6/1LB", 269.99, "25 LB", 76.90),
+            ("Onion Powder", "6/1LB", 148.95, "25 LB", 39.80),
+            ("Garlic Granulated", "5/1LB", 165.99, "25 LB", 67.47),
         ]
         
         results = []
@@ -200,9 +213,11 @@ class CorrectedVendorComparison:
         print("\n" + "="*80)
         print("CORRECTED SPICE PRICE COMPARISON")
         print("="*80)
-        print("\nPack Size Interpretations:")
-        print("- SYSCO '6/1#' = 6 containers × 1 pound = 6 pounds total")
-        print("- Shamrock '25 LB' = 25 pounds total")
+        print("\nPack Size Format Guide:")
+        print("- Shamrock '1/6/LB' = 1 container × 6 pounds = 6 lbs total")
+        print("- SYSCO '3/6LB' = 3 containers × 6 pounds each = 18 lbs total")
+        print("- SYSCO '6/1LB' = 6 containers × 1 pound each = 6 lbs total")
+        print("- Simple '25 LB' = 25 pounds total")
         print("-"*80)
         
         for _, row in df.iterrows():
@@ -234,12 +249,12 @@ if __name__ == "__main__":
     print("="*50)
     
     test_packs = [
-        "6/10#",     # 6 × 10 pounds = 60 lbs
+        "1/6/LB",    # Shamrock: 1 × 6 pounds = 6 lbs
+        "3/6LB",     # SYSCO: 3 × 6 pounds = 18 lbs  
+        "6/1LB",     # SYSCO: 6 × 1 pound = 6 lbs
+        "25 LB",     # Simple: 25 pounds
+        "50 LB",     # Simple: 50 pounds
         "6/#10",     # 6 × #10 cans = 654 oz
-        "25 LB",     # 25 pounds
-        "50 LB",     # 50 pounds
-        "4/1 GAL",   # 4 × 1 gallon
-        "6/1#",      # 6 × 1 pound = 6 lbs
     ]
     
     for pack in test_packs:
