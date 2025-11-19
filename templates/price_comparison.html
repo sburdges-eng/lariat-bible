@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Price Comparison{% endblock %}
+
+{% block content %}
+<div class="price-comparison-container">
+    <div class="page-header">
+        <h1><i class="fas fa-balance-scale"></i> Price Comparison Tool</h1>
+    </div>
+
+    <!-- Import/Export Section -->
+    <div class="import-export-section">
+        <div class="card">
+            <h3><i class="fas fa-file-import"></i> Import Price Data</h3>
+            <p>Upload vendor price lists in Excel format (.xlsx, .xls)</p>
+            <div class="file-upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag & drop Excel files here or click to browse</p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" multiple onchange="handleFileUpload(event)">
+                <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open"></i> Select Files
+                </button>
+            </div>
+            <div id="uploadStatus"></div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-file-export"></i> Export Price Data</h3>
+            <p>Download price comparisons and analysis in Excel format</p>
+            <div class="export-options">
+                <button class="btn-export" onclick="exportPriceComparison()">
+                    <i class="fas fa-table"></i> Full Comparison Report
+                </button>
+                <button class="btn-export" onclick="exportTopSavings()">
+                    <i class="fas fa-trophy"></i> Top Savings Opportunities
+                </button>
+                <button class="btn-export" onclick="exportByCategory()">
+                    <i class="fas fa-th"></i> Category Analysis
+                </button>
+                <button class="btn-export" onclick="exportCustomReport()">
+                    <i class="fas fa-cog"></i> Custom Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Compare Section -->
+    <div class="quick-compare-section">
+        <h2><i class="fas fa-search-dollar"></i> Quick Product Compare</h2>
+        <div class="compare-inputs">
+            <div class="compare-input-group">
+                <label>Product/Item Code</label>
+                <input type="text" id="productSearch" placeholder="Search by name or code..." oninput="searchProducts()">
+                <div id="productSuggestions" class="suggestions"></div>
+            </div>
+            <button class="btn-primary" onclick="compareProduct()">
+                <i class="fas fa-exchange-alt"></i> Compare Prices
+            </button>
+        </div>
+        <div id="quickCompareResults"></div>
+    </div>
+
+    <!-- Comparison Results -->
+    <div class="comparison-results" id="comparisonResults">
+        <div class="results-header">
+            <h2><i class="fas fa-list-alt"></i> Comparison Results</h2>
+            <div class="results-controls">
+                <button class="btn-secondary" onclick="clearResults()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+                <button class="btn-primary" onclick="exportResults()">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
+            </div>
+        </div>
+        <div id="resultsTable"></div>
+    </div>
+
+    <!-- Batch Upload Template -->
+    <div class="template-section">
+        <h2><i class="fas fa-file-download"></i> Download Import Templates</h2>
+        <p>Use these templates to format your vendor price data correctly</p>
+        <div class="template-buttons">
+            <button class="btn-secondary" onclick="downloadTemplate('shamrock')">
+                <i class="fas fa-file-excel"></i> Shamrock Foods Template
+            </button>
+            <button class="btn-secondary" onclick="downloadTemplate('sysco')">
+                <i class="fas fa-file-excel"></i> SYSCO Template
+            </button>
+            <button class="btn-secondary" onclick="downloadTemplate('generic')">
+                <i class="fas fa-file-excel"></i> Generic Vendor Template
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/price_comparison.js') }}"></script>
+{% endblock %}

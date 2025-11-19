@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}The Lariat Bible{% endblock %} - Restaurant Management</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Plotly.js for advanced charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-hat-cowboy"></i>
+                <span>The Lariat Bible</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('vendor_analysis_page') }}" class="nav-link"><i class="fas fa-chart-line"></i> Vendor Analysis</a></li>
+                <li><a href="{{ url_for('price_comparison_page') }}" class="nav-link"><i class="fas fa-balance-scale"></i> Price Compare</a></li>
+                <li><a href="{{ url_for('order_guides_page') }}" class="nav-link"><i class="fas fa-book"></i> Order Guides</a></li>
+                <li><a href="{{ url_for('profit_calculator_page') }}" class="nav-link"><i class="fas fa-calculator"></i> Profit Calculator</a></li>
+                <li><a href="{{ url_for('recipe_costing_page') }}" class="nav-link"><i class="fas fa-utensils"></i> Recipe Costing</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 The Lariat Restaurant - Fort Collins, CO | Built with data-driven insights</p>
+    </footer>
+
+    <!-- Common JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

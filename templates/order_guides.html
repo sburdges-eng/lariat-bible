@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Order Guides{% endblock %}
+
+{% block content %}
+<div class="order-guides-container">
+    <div class="page-header">
+        <h1><i class="fas fa-book"></i> Order Guide Management</h1>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="importOrderGuide()">
+                <i class="fas fa-file-import"></i> Import Order Guide
+            </button>
+            <button class="btn-primary" onclick="exportOrderGuide()">
+                <i class="fas fa-file-export"></i> Export Order Guide
+            </button>
+        </div>
+    </div>
+
+    <!-- Order Guide Import/Export -->
+    <div class="guide-management-section">
+        <div class="card">
+            <h3><i class="fas fa-upload"></i> Import Vendor Order Guide</h3>
+            <div class="import-area">
+                <select id="vendorSelect">
+                    <option value="shamrock">Shamrock Foods</option>
+                    <option value="sysco">SYSCO</option>
+                    <option value="us_foods">US Foods</option>
+                    <option value="custom">Custom Vendor</option>
+                </select>
+                <div class="file-upload-zone" onclick="document.getElementById('guideFileInput').click()">
+                    <i class="fas fa-file-excel fa-3x"></i>
+                    <p>Click or drag Excel file here</p>
+                    <small>Supported formats: .xlsx, .xls, .csv</small>
+                </div>
+                <input type="file" id="guideFileInput" accept=".xlsx,.xls,.csv" style="display: none;" onchange="handleGuideUpload(event)">
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-download"></i> Export Order Guide</h3>
+            <div class="export-options">
+                <div class="export-option">
+                    <input type="checkbox" id="includePrices" checked>
+                    <label for="includePrices">Include Prices</label>
+                </div>
+                <div class="export-option">
+                    <input type="checkbox" id="includeSpecs" checked>
+                    <label for="includeSpecs">Include Specifications</label>
+                </div>
+                <div class="export-option">
+                    <input type="checkbox" id="includeComparison">
+                    <label for="includeComparison">Include Vendor Comparison</label>
+                </div>
+                <div class="export-option">
+                    <input type="checkbox" id="includeSavings" checked>
+                    <label for="includeSavings">Include Savings Analysis</label>
+                </div>
+                <button class="btn-primary full-width" onclick="performExport()">
+                    <i class="fas fa-file-excel"></i> Generate Excel Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Order Guides -->
+    <div class="current-guides-section">
+        <h2><i class="fas fa-th-list"></i> Current Order Guides</h2>
+        <div class="guides-grid">
+            <div class="guide-card">
+                <div class="guide-header">
+                    <h3>Shamrock Foods</h3>
+                    <span class="status-badge active">Active</span>
+                </div>
+                <div class="guide-stats">
+                    <div class="stat">
+                        <span class="stat-label">Products</span>
+                        <span class="stat-value">856</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Categories</span>
+                        <span class="stat-value">24</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Last Updated</span>
+                        <span class="stat-value">2 days ago</span>
+                    </div>
+                </div>
+                <div class="guide-actions">
+                    <button class="btn-secondary" onclick="viewGuide('shamrock')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn-secondary" onclick="downloadGuide('shamrock')">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="btn-secondary" onclick="editGuide('shamrock')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <div class="guide-header">
+                    <h3>SYSCO</h3>
+                    <span class="status-badge active">Active</span>
+                </div>
+                <div class="guide-stats">
+                    <div class="stat">
+                        <span class="stat-label">Products</span>
+                        <span class="stat-value">1,243</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Categories</span>
+                        <span class="stat-value">28</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Last Updated</span>
+                        <span class="stat-value">5 days ago</span>
+                    </div>
+                </div>
+                <div class="guide-actions">
+                    <button class="btn-secondary" onclick="viewGuide('sysco')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn-secondary" onclick="downloadGuide('sysco')">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="btn-secondary" onclick="editGuide('sysco')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Guide Comparison -->
+    <div class="guide-comparison-section">
+        <h2><i class="fas fa-exchange-alt"></i> Compare Order Guides</h2>
+        <div class="comparison-controls">
+            <select id="compareGuide1">
+                <option value="shamrock">Shamrock Foods</option>
+                <option value="sysco">SYSCO</option>
+            </select>
+            <i class="fas fa-arrows-alt-h"></i>
+            <select id="compareGuide2">
+                <option value="sysco">SYSCO</option>
+                <option value="shamrock">Shamrock Foods</option>
+            </select>
+            <button class="btn-primary" onclick="compareGuides()">
+                <i class="fas fa-balance-scale"></i> Compare
+            </button>
+        </div>
+        <div id="guideComparisonResults"></div>
+    </div>
+
+    <!-- Order Guide Viewer/Editor -->
+    <div class="guide-viewer" id="guideViewer" style="display: none;">
+        <div class="viewer-header">
+            <h2 id="viewerTitle">Order Guide</h2>
+            <div class="viewer-controls">
+                <input type="text" id="guideSearch" placeholder="Search products...">
+                <select id="guideCategoryFilter">
+                    <option value="all">All Categories</option>
+                </select>
+                <button class="btn-secondary" onclick="closeViewer()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+        <div id="guideTable"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/order_guides.js') }}"></script>
+{% endblock %}

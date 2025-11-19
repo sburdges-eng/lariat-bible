@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Analysis{% endblock %}
+
+{% block content %}
+<div class="vendor-analysis-container">
+    <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> Vendor Analysis & Comparison</h1>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+            <button class="btn-primary" onclick="exportFullComparison()">
+                <i class="fas fa-file-excel"></i> Export Full Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Vendor Selection -->
+    <div class="vendor-selector">
+        <div class="selector-card">
+            <label>Primary Vendor</label>
+            <select id="primaryVendor" onchange="updateComparison()">
+                <option value="shamrock">Shamrock Foods</option>
+                <option value="sysco">SYSCO</option>
+                <option value="us_foods">US Foods</option>
+            </select>
+        </div>
+        <div class="selector-icon">
+            <i class="fas fa-exchange-alt"></i>
+        </div>
+        <div class="selector-card">
+            <label>Compare With</label>
+            <select id="compareVendor" onchange="updateComparison()">
+                <option value="sysco">SYSCO</option>
+                <option value="shamrock">Shamrock Foods</option>
+                <option value="us_foods">US Foods</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Comparison Summary -->
+    <div class="comparison-summary">
+        <div class="summary-card winner">
+            <h3>Recommended Vendor</h3>
+            <div class="vendor-logo">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 id="recommendedVendor">Shamrock Foods</h2>
+            <p class="savings-amount">Save $4,333/month</p>
+            <p class="savings-percent">29.5% Average Savings</p>
+        </div>
+
+        <div class="summary-metrics">
+            <div class="summary-metric">
+                <i class="fas fa-shopping-cart"></i>
+                <div>
+                    <h4>Products Compared</h4>
+                    <p id="productsCompared">248</p>
+                </div>
+            </div>
+            <div class="summary-metric">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <h4>Better Prices</h4>
+                    <p id="betterPrices">186 (75%)</p>
+                </div>
+            </div>
+            <div class="summary-metric">
+                <i class="fas fa-calendar-alt"></i>
+                <div>
+                    <h4>Annual Savings</h4>
+                    <p id="annualSavings">$52,000</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-bar"></i> Savings by Category</h2>
+            </div>
+            <canvas id="categoryS savingsChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-percentage"></i> Price Difference Distribution</h2>
+            </div>
+            <canvas id="priceDistributionChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Price Comparison Table -->
+    <div class="comparison-table-container">
+        <div class="chart-header">
+            <h2><i class="fas fa-table"></i> Detailed Price Comparison</h2>
+            <div class="table-controls">
+                <input type="text" id="searchProducts" placeholder="Search products..." onkeyup="filterProducts()">
+                <select id="categoryFilter" onchange="filterProducts()">
+                    <option value="all">All Categories</option>
+                    <option value="spices">Spices</option>
+                    <option value="produce">Produce</option>
+                    <option value="meat">Meat & Protein</option>
+                    <option value="dairy">Dairy</option>
+                    <option value="dry_goods">Dry Goods</option>
+                </select>
+                <button class="btn-secondary" onclick="exportTableToExcel()">
+                    <i class="fas fa-file-excel"></i> Export Table
+                </button>
+            </div>
+        </div>
+        <div id="comparisonTable"></div>
+    </div>
+
+    <!-- Price Trend Analysis -->
+    <div class="chart-container full-width">
+        <div class="chart-header">
+            <h2><i class="fas fa-chart-area"></i> Historical Price Trends</h2>
+            <select id="trendCategory" onchange="updatePriceTrends()">
+                <option value="all">All Products</option>
+                <option value="spices">Spices</option>
+                <option value="produce">Produce</option>
+            </select>
+        </div>
+        <div id="priceTrendChart"></div>
+    </div>
+
+    <!-- Margin Impact Analysis -->
+    <div class="margin-analysis">
+        <h2><i class="fas fa-chart-pie"></i> Margin Impact Analysis</h2>
+        <div class="margin-comparison">
+            <div class="margin-card">
+                <h3>Current Margins</h3>
+                <div class="margin-bars">
+                    <div class="margin-bar">
+                        <span>Catering</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 45%; background: #4facfe;">45%</div>
+                        </div>
+                    </div>
+                    <div class="margin-bar">
+                        <span>Restaurant</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 4%; background: #f5576c;">4%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="margin-card highlighted">
+                <h3>Projected Margins (with Shamrock)</h3>
+                <div class="margin-bars">
+                    <div class="margin-bar">
+                        <span>Catering</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 52%; background: #43e97b;">52.7%</div>
+                        </div>
+                        <span class="improvement">+7.7%</span>
+                    </div>
+                    <div class="margin-bar">
+                        <span>Restaurant</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 8%; background: #38f9d7;">8.7%</div>
+                        </div>
+                        <span class="improvement">+4.7%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/vendor_analysis.js') }}"></script>
+{% endblock %}

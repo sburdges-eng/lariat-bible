@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Recipe Costing{% endblock %}
+
+{% block content %}
+<div class="recipe-costing-container">
+    <div class="page-header">
+        <h1><i class="fas fa-utensils"></i> Recipe Cost Analysis</h1>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="importRecipes()">
+                <i class="fas fa-file-import"></i> Import Recipes
+            </button>
+            <button class="btn-primary" onclick="exportRecipeCosts()">
+                <i class="fas fa-file-export"></i> Export Cost Analysis
+            </button>
+        </div>
+    </div>
+
+    <!-- Recipe Builder -->
+    <div class="recipe-builder">
+        <div class="builder-header">
+            <h2><i class="fas fa-plus-circle"></i> Recipe Builder</h2>
+        </div>
+        <div class="recipe-info">
+            <div class="input-group">
+                <label>Recipe Name</label>
+                <input type="text" id="recipeName" placeholder="e.g., Signature BBQ Sandwich">
+            </div>
+            <div class="input-group">
+                <label>Serves</label>
+                <input type="number" id="recipeServes" value="1" min="1">
+            </div>
+            <div class="input-group">
+                <label>Category</label>
+                <select id="recipeCategory">
+                    <option value="appetizer">Appetizer</option>
+                    <option value="entree">Entree</option>
+                    <option value="side">Side</option>
+                    <option value="dessert">Dessert</option>
+                    <option value="catering">Catering</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ingredients-section">
+            <h3><i class="fas fa-list"></i> Ingredients</h3>
+            <div id="ingredientsList">
+                <div class="ingredient-row">
+                    <input type="text" class="ingredient-name" placeholder="Ingredient name">
+                    <input type="number" class="ingredient-qty" placeholder="Qty" step="0.01">
+                    <select class="ingredient-unit">
+                        <option value="lb">Pounds</option>
+                        <option value="oz">Ounces</option>
+                        <option value="gal">Gallons</option>
+                        <option value="qt">Quarts</option>
+                        <option value="cup">Cups</option>
+                        <option value="tbsp">Tablespoons</option>
+                        <option value="tsp">Teaspoons</option>
+                        <option value="each">Each</option>
+                    </select>
+                    <input type="number" class="ingredient-cost" placeholder="Cost" step="0.01" oninput="calculateRecipeCost()">
+                    <button class="btn-remove" onclick="removeIngredient(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <button class="btn-secondary" onclick="addIngredient()">
+                <i class="fas fa-plus"></i> Add Ingredient
+            </button>
+        </div>
+
+        <div class="recipe-cost-summary">
+            <div class="cost-item">
+                <span>Total Ingredient Cost:</span>
+                <span id="totalIngredientCost">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <span>Labor Cost (est. 30%):</span>
+                <span id="laborCostEst">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <span>Overhead (est. 15%):</span>
+                <span id="overheadCostEst">$0.00</span>
+            </div>
+            <div class="cost-item total">
+                <span>Total Cost per Serving:</span>
+                <span id="costPerServing">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <span>Suggested Price (45% margin):</span>
+                <span id="suggestedPrice">$0.00</span>
+            </div>
+        </div>
+
+        <button class="btn-primary full-width" onclick="saveRecipe()">
+            <i class="fas fa-save"></i> Save Recipe
+        </button>
+    </div>
+
+    <!-- Recipe List -->
+    <div class="recipe-list-section">
+        <h2><i class="fas fa-book-open"></i> Recipe Library</h2>
+        <div class="list-controls">
+            <input type="text" id="recipeSearch" placeholder="Search recipes..." oninput="filterRecipes()">
+            <select id="categoryFilter" onchange="filterRecipes()">
+                <option value="all">All Categories</option>
+                <option value="appetizer">Appetizers</option>
+                <option value="entree">Entrees</option>
+                <option value="side">Sides</option>
+                <option value="dessert">Desserts</option>
+                <option value="catering">Catering</option>
+            </select>
+        </div>
+        <div id="recipeCards"></div>
+    </div>
+
+    <!-- Cost Breakdown Charts -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-pie"></i> Ingredient Cost Breakdown</h2>
+            </div>
+            <canvas id="ingredientBreakdownChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-bar"></i> Menu Cost Comparison</h2>
+            </div>
+            <canvas id="menuCostComparisonChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Vendor Impact Analysis -->
+    <div class="vendor-impact-section">
+        <h2><i class="fas fa-exchange-alt"></i> Vendor Impact on Recipe Costs</h2>
+        <p>See how switching vendors affects your recipe costs</p>
+        <div class="vendor-comparison-grid">
+            <div class="vendor-column">
+                <h3>Current Vendor (SYSCO)</h3>
+                <div id="currentVendorCosts"></div>
+            </div>
+            <div class="savings-column">
+                <div class="savings-indicator">
+                    <i class="fas fa-arrow-right"></i>
+                    <div class="savings-amount">
+                        <span>Save</span>
+                        <strong id="vendorSavingsAmount">$0.00</strong>
+                        <span>per serving</span>
+                    </div>
+                </div>
+            </div>
+            <div class="vendor-column highlighted">
+                <h3>Alternative (Shamrock)</h3>
+                <div id="alternativeVendorCosts"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Analysis -->
+    <div class="batch-analysis-section">
+        <h2><i class="fas fa-calculator"></i> Batch Cost Calculator</h2>
+        <div class="batch-inputs">
+            <div class="input-group">
+                <label>Select Recipe</label>
+                <select id="batchRecipeSelect">
+                    <option value="">Choose a recipe...</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Number of Servings</label>
+                <input type="number" id="batchServings" min="1" value="50">
+            </div>
+            <button class="btn-primary" onclick="calculateBatchCost()">
+                <i class="fas fa-calculator"></i> Calculate Batch Cost
+            </button>
+        </div>
+        <div id="batchResults"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/recipe_costing.js') }}"></script>
+{% endblock %}

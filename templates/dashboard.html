@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1><i class="fas fa-chart-pie"></i> Business Intelligence Dashboard</h1>
+        <div class="date-range">
+            <select id="dateRange" onchange="updateDashboard()">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="365">Last Year</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card" data-metric="savings">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-piggy-bank"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Annual Savings Potential</h3>
+                <p class="metric-value" id="annualSavings">$52,000</p>
+                <span class="metric-change positive"><i class="fas fa-arrow-up"></i> 29.5% vs SYSCO</span>
+            </div>
+        </div>
+
+        <div class="metric-card" data-metric="revenue">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Monthly Revenue</h3>
+                <p class="metric-value" id="monthlyRevenue">$48,000</p>
+                <span class="metric-breakdown">Restaurant: $20k | Catering: $28k</span>
+            </div>
+        </div>
+
+        <div class="metric-card" data-metric="margin">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Profit Margin</h3>
+                <p class="metric-value" id="profitMargin">18.5%</p>
+                <span class="metric-breakdown">Catering: 45% | Restaurant: 4%</span>
+            </div>
+        </div>
+
+        <div class="metric-card" data-metric="efficiency">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="metric-content">
+                <h3>Cost Efficiency</h3>
+                <p class="metric-value" id="costEfficiency">87%</p>
+                <span class="metric-change positive"><i class="fas fa-arrow-up"></i> +5% this month</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-area"></i> Monthly Savings Trend</h2>
+                <div class="chart-controls">
+                    <button class="btn-chart-action" onclick="exportChart('savingsTrendChart')">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <canvas id="savingsTrendChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-bar"></i> Vendor Comparison</h2>
+                <div class="chart-controls">
+                    <button class="btn-chart-action" onclick="exportChart('vendorComparisonChart')">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <canvas id="vendorComparisonChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-pie"></i> Cost Breakdown by Category</h2>
+                <div class="chart-controls">
+                    <button class="btn-chart-action" onclick="exportChart('categoryBreakdownChart')">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <canvas id="categoryBreakdownChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-line"></i> Revenue vs Costs</h2>
+                <div class="chart-controls">
+                    <button class="btn-chart-action" onclick="exportChart('revenueCostChart')">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <canvas id="revenueCostChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Interactive Analysis Section -->
+    <div class="analysis-section">
+        <div class="chart-container full-width">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-scatter"></i> Price Trend Analysis (Interactive)</h2>
+                <div class="chart-controls">
+                    <select id="productSelector" onchange="updatePriceTrendChart()">
+                        <option value="all">All Products</option>
+                        <option value="spices">Spices</option>
+                        <option value="produce">Produce</option>
+                        <option value="meat">Meat & Protein</option>
+                        <option value="dairy">Dairy</option>
+                    </select>
+                    <button class="btn-chart-action" onclick="exportPriceTrend()">
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </button>
+                </div>
+            </div>
+            <div id="priceTrendChart"></div>
+        </div>
+    </div>
+
+    <!-- Top Savings Opportunities -->
+    <div class="savings-opportunities">
+        <div class="chart-header">
+            <h2><i class="fas fa-trophy"></i> Top 10 Savings Opportunities</h2>
+            <button class="btn-primary" onclick="exportSavingsOpportunities()">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        </div>
+        <div id="savingsTable"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

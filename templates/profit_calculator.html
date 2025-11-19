@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Profit Calculator{% endblock %}
+
+{% block content %}
+<div class="profit-calculator-container">
+    <div class="page-header">
+        <h1><i class="fas fa-calculator"></i> Profit Margin Calculator</h1>
+    </div>
+
+    <!-- Calculator Input Section -->
+    <div class="calculator-section">
+        <div class="calculator-card">
+            <h3><i class="fas fa-edit"></i> Enter Costs</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Food Cost ($)</label>
+                    <input type="number" id="foodCost" placeholder="0.00" oninput="calculateMargins()" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Labor Cost ($)</label>
+                    <input type="number" id="laborCost" placeholder="0.00" oninput="calculateMargins()" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Overhead Cost ($)</label>
+                    <input type="number" id="overheadCost" placeholder="0.00" oninput="calculateMargins()" step="0.01">
+                </div>
+                <div class="input-group">
+                    <label>Selling Price ($)</label>
+                    <input type="number" id="sellingPrice" placeholder="0.00" oninput="calculateMargins()" step="0.01">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Service Type</label>
+                <select id="serviceType" onchange="calculateMargins()">
+                    <option value="restaurant">Restaurant Service</option>
+                    <option value="catering">Catering</option>
+                    <option value="takeout">Takeout</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="calculator-results">
+            <h3><i class="fas fa-chart-pie"></i> Calculated Margins</h3>
+            <div class="margin-results">
+                <div class="result-item">
+                    <span class="result-label">Total Cost</span>
+                    <span class="result-value" id="totalCost">$0.00</span>
+                </div>
+                <div class="result-item highlight">
+                    <span class="result-label">Profit Margin</span>
+                    <span class="result-value large" id="profitMargin">0%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Net Profit</span>
+                    <span class="result-value" id="netProfit">$0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Food Cost %</span>
+                    <span class="result-value" id="foodCostPercent">0%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Labor Cost %</span>
+                    <span class="result-value" id="laborCostPercent">0%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Target Price (45% margin)</span>
+                    <span class="result-value" id="targetPrice">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Breakdown -->
+    <div class="charts-row">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-pie"></i> Cost Breakdown</h2>
+            </div>
+            <canvas id="costBreakdownChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-bar"></i> Margin Comparison</h2>
+            </div>
+            <canvas id="marginComparisonChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Scenario Analysis -->
+    <div class="scenario-analysis">
+        <h2><i class="fas fa-sliders-h"></i> Scenario Analysis</h2>
+        <div class="scenario-grid">
+            <div class="scenario-card">
+                <h4>Reduce Food Cost by 10%</h4>
+                <div class="scenario-impact">
+                    <span class="impact-label">New Margin:</span>
+                    <span class="impact-value" id="scenario1Margin">--</span>
+                </div>
+                <div class="scenario-impact">
+                    <span class="impact-label">Additional Profit:</span>
+                    <span class="impact-value" id="scenario1Profit">--</span>
+                </div>
+                <button class="btn-secondary" onclick="applyScenario(1)">Apply</button>
+            </div>
+
+            <div class="scenario-card">
+                <h4>Increase Price by 5%</h4>
+                <div class="scenario-impact">
+                    <span class="impact-label">New Margin:</span>
+                    <span class="impact-value" id="scenario2Margin">--</span>
+                </div>
+                <div class="scenario-impact">
+                    <span class="impact-label">Additional Profit:</span>
+                    <span class="impact-value" id="scenario2Profit">--</span>
+                </div>
+                <button class="btn-secondary" onclick="applyScenario(2)">Apply</button>
+            </div>
+
+            <div class="scenario-card">
+                <h4>Switch to Shamrock Foods</h4>
+                <div class="scenario-impact">
+                    <span class="impact-label">New Margin:</span>
+                    <span class="impact-value" id="scenario3Margin">--</span>
+                </div>
+                <div class="scenario-impact">
+                    <span class="impact-label">Additional Profit:</span>
+                    <span class="impact-value" id="scenario3Profit">--</span>
+                </div>
+                <button class="btn-secondary" onclick="applyScenario(3)">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Calculator -->
+    <div class="bulk-calculator-section">
+        <h2><i class="fas fa-table"></i> Bulk Menu Item Analysis</h2>
+        <div class="bulk-controls">
+            <button class="btn-primary" onclick="importMenuItems()">
+                <i class="fas fa-file-import"></i> Import Menu Items (Excel)
+            </button>
+            <button class="btn-primary" onclick="exportMarginAnalysis()">
+                <i class="fas fa-file-export"></i> Export Analysis
+            </button>
+        </div>
+        <div id="bulkAnalysisTable"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/profit_calculator.js') }}"></script>
+{% endblock %}
