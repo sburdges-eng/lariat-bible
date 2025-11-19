@@ -28,6 +28,18 @@ def index():
         return render_template('index.html')
 
 
+@main_bp.route('/dashboard')
+def dashboard():
+    """
+    Interactive dashboard with charts and real-time features.
+
+    Returns:
+        HTML page with interactive components
+    """
+    current_app.logger.info('Interactive dashboard accessed')
+    return render_template('dashboard.html')
+
+
 def get_dashboard_data():
     """
     Get dashboard data for API requests.

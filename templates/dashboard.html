@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The Lariat Bible - Interactive Restaurant Management Dashboard">
+    <title>Dashboard | The Lariat Bible</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/interactive.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-lasso"></i>
+                <span>The Lariat Bible</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-item active">
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard
+                </a>
+                <a href="#vendors" class="nav-item">
+                    <i class="fas fa-truck"></i>
+                    Vendors
+                </a>
+                <a href="#recipes" class="nav-item">
+                    <i class="fas fa-utensils"></i>
+                    Recipes
+                </a>
+                <a href="#catering" class="nav-item">
+                    <i class="fas fa-calendar-check"></i>
+                    Catering
+                </a>
+                <a href="#inventory" class="nav-item">
+                    <i class="fas fa-boxes"></i>
+                    Inventory
+                </a>
+                <a href="#reports" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    Reports
+                </a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-icon" id="notificationBtn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                <button class="btn-icon" id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Header Section -->
+        <header class="page-header">
+            <div>
+                <h1>Interactive Dashboard</h1>
+                <p class="subtitle">Real-time analytics and cost optimization tools</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    Print Report
+                </button>
+                <button class="btn btn-secondary" onclick="LariatInteractive.exportTableToCSV('vendorComparisonTable', 'vendor-comparison.csv')">
+                    <i class="fas fa-download"></i>
+                    Export CSV
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync"></i>
+                    Refresh Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Cards with Sparklines -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon revenue">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">Monthly Revenue</p>
+                    <h3 class="stat-value" id="monthlyRevenue">$48,000</h3>
+                    <div style="height: 40px; margin-top: 8px;">
+                        <canvas id="revenueSpark"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon savings">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">Potential Savings</p>
+                    <h3 class="stat-value" id="potentialSavings">$52,000</h3>
+                    <div style="height: 40px; margin-top: 8px;">
+                        <canvas id="savingsSpark"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon events">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">Upcoming Events</p>
+                    <h3 class="stat-value" id="upcomingEvents">7</h3>
+                    <div style="height: 40px; margin-top: 8px;">
+                        <canvas id="eventsSpark"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon inventory">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-content">
+                    <p class="stat-label">Food Cost %</p>
+                    <h3 class="stat-value">28.5%</h3>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-down"></i> -1.5%
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="content-grid">
+            <!-- Revenue Trends Chart -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-chart-line"></i>
+                        Revenue Trends
+                    </h2>
+                    <button class="btn-link">View Details</button>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container chart-container-large">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendor Performance Radar -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-star"></i>
+                        Vendor Performance
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="vendorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-pie-chart"></i>
+                        Cost Breakdown
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Potential -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-chart-bar"></i>
+                        Cost Optimization Opportunities
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="savingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Vendor Comparison -->
+        <section class="card" style="margin-top: var(--spacing-xl);">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-balance-scale"></i>
+                    Interactive Vendor Comparison
+                </h2>
+                <button class="btn-link" onclick="LariatInteractive.exportTableToCSV('vendorComparisonTable', 'vendors.csv')">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="vendorComparisonTable"></div>
+            </div>
+        </section>
+
+        <!-- Recipe Cost Calculator -->
+        <section class="card" style="margin-top: var(--spacing-xl);">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-calculator"></i>
+                    Real-Time Recipe Cost Calculator
+                </h2>
+                <button class="btn-link" onclick="window.recipeCalc.loadSampleRecipe()">
+                    <i class="fas fa-flask"></i> Load Sample
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="recipeCalculator"></div>
+            </div>
+        </section>
+
+        <!-- Quick Insights -->
+        <section class="content-grid" style="margin-top: var(--spacing-xl);">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-lightbulb"></i>
+                        Quick Insights
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon green">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Revenue increased 12%</strong></p>
+                                <span class="activity-time">vs last month</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon blue">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Food cost at 28.5%</strong></p>
+                                <span class="activity-time">Target: 30%</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon orange">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>12 items low in stock</strong></p>
+                                <span class="activity-time">Review inventory</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon purple">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Best month this year</strong></p>
+                                <span class="activity-time">Keep it up!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-tasks"></i>
+                        Action Items
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon blue">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>Review Shamrock Foods pricing</p>
+                                <span class="activity-time">High priority</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon green">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>Confirm catering for Friday</p>
+                                <span class="activity-time">Due tomorrow</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon orange">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>Order olive oil (low stock)</p>
+                                <span class="activity-time">Order today</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon purple">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>Update summer menu costs</p>
+                                <span class="activity-time">This week</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 The Lariat Bible. Built with <i class="fas fa-heart"></i> for restaurant success.</p>
+        <div class="footer-links">
+            <a href="#help">Help</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/interactive.js"></script>
+
+    <script>
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Initializing interactive dashboard...');
+
+            // Initialize charts
+            LariatCharts.initialize();
+
+            // Setup auto-refresh
+            LariatCharts.setupAutoRefresh();
+
+            console.log('✅ Interactive dashboard ready!');
+        });
+    </script>
+</body>
+</html>
