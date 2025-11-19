@@ -1,0 +1,90 @@
+╔════════════════════════════════════════════════════════════╗
+║          QUICK LOGO SETUP - The Lariat Bible              ║
+╚════════════════════════════════════════════════════════════╝
+
+Your logo file: whitelariatlogoblkbg.heic (in Downloads)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 1: Automatic Conversion (Recommended)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Copy your logo to the project folder:
+   cp ~/Downloads/whitelariatlogoblkbg.heic /home/user/lariat-bible/
+
+2. Run the conversion script:
+   cd /home/user/lariat-bible
+   python convert_logo.py whitelariatlogoblkbg.heic
+
+3. Done! Your logo is now at: static/images/lariat-logo-white.png
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 2: Manual Conversion (On Mac)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open whitelariatlogoblkbg.heic in Preview (Mac)
+2. File → Export
+3. Format: PNG
+4. Save as: lariat-logo-white.png
+5. Copy to: /home/user/lariat-bible/static/images/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 3: Using ImageMagick
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+convert ~/Downloads/whitelariatlogoblkbg.heic \
+        static/images/lariat-logo-white.png
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION 4: Online Converter
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to: https://convertio.co/heic-png/
+2. Upload: whitelariatlogoblkbg.heic
+3. Download the PNG
+4. Rename to: lariat-logo-white.png
+5. Copy to: static/images/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VERIFY IT WORKS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Check file exists:
+   ls -lh static/images/lariat-logo-white.png
+
+2. Start the app:
+   python app.py
+
+3. Open browser: http://localhost:5000
+
+4. Look for your logo in the top-left corner!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TROUBLESHOOTING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Logo not showing?
+✓ Check file name is exactly: lariat-logo-white.png
+✓ Check location is: static/images/
+✓ Refresh browser (Ctrl+F5 or Cmd+Shift+R)
+✓ Check browser console for errors (F12)
+
+Still using cowboy icon?
+✓ Logo will fallback to icon if file not found
+✓ This is normal until PNG file is added
+
+Need help?
+✓ Check LOGO_SETUP.md for detailed instructions
+✓ Run: python convert_logo.py --help
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STATUS: ⏳ Waiting for logo file
+NEXT:   📁 Add lariat-logo-white.png to static/images/
+
+╚════════════════════════════════════════════════════════════╝
