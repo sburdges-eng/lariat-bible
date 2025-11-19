@@ -80,6 +80,14 @@ body {
     font-size: 2rem;
 }
 
+.brand-logo {
+    height: 50px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    margin-right: 0.5rem;
+}
+
 .nav-menu {
     display: flex;
     list-style: none;
