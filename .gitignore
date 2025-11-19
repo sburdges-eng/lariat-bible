@@ -77,6 +77,14 @@ env/
 *.log
 logs/
 
+# Flask
+instance/
+.webassets-cache
+
+# Uploads
+uploads/
+!uploads/.gitkeep
+
 # Invoice data (contains sensitive information)
 data/invoices/*.jpg
 data/invoices/*.png
