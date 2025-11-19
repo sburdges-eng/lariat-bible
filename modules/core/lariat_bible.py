@@ -15,6 +15,7 @@ from modules.recipes.recipe import Recipe, Ingredient, RecipeIngredient
 from modules.order_guides.order_guide_manager import OrderGuideManager
 from modules.equipment.equipment_manager import EquipmentManager, Equipment
 from modules.vendor_analysis.comparator import VendorComparator
+from modules.vendor_analysis.hybrid_matcher import HybridVendorMatcher, match_vendors_from_excel
 
 
 class LariatBible:
@@ -30,7 +31,8 @@ class LariatBible:
         self.order_guide_manager = OrderGuideManager()
         self.equipment_manager = EquipmentManager()
         self.vendor_comparator = VendorComparator()
-        
+        self.hybrid_matcher = HybridVendorMatcher()
+
         # Restaurant metrics
         self.monthly_catering_revenue = 28000
         self.monthly_restaurant_revenue = 20000
@@ -260,8 +262,132 @@ class LariatBible:
         
         return optimization_results
     
+    # ========== HYBRID VENDOR MATCHING ==========
+
+    def run_hybrid_vendor_match(self, shamrock_df: pd.DataFrame, sysco_df: pd.DataFrame) -> Dict:
+        """
+        Run hybrid vendor matching (fuzzy + specification validation)
+
+        Args:
+            shamrock_df: DataFrame with Shamrock products (sku, description, price, pack)
+            sysco_df: DataFrame with SYSCO products (sku, description, price, pack)
+
+        Returns:
+            Dictionary with match results and statistics
+        """
+        # Run matching
+        self.hybrid_matcher.match_all(shamrock_df, sysco_df)
+
+        # Get savings summary
+        savings_summary = self.hybrid_matcher.get_savings_summary()
+
+        # Convert high-confidence matches to ingredients and add to system
+        category_map = self._auto_categorize_products()
+        new_ingredients = self.hybrid_matcher.to_ingredients(category_map)
+
+        # Add ingredients to system
+        for ingredient in new_ingredients:
+            self.ingredients[ingredient.ingredient_id] = ingredient
+
+        return {
+            'total_matches': len(self.hybrid_matcher.matches),
+            'ingredients_added': len(new_ingredients),
+            'savings_summary': savings_summary,
+            'match_df': self.hybrid_matcher.to_dataframe()
+        }
+
+    def import_and_match_vendors(self, excel_file: str, shamrock_sheet: str = 'Shamrock_Data',
+                                 sysco_sheet: str = 'Sysco_Data') -> Dict:
+        """
+        Import vendor data from Excel and run hybrid matching
+
+        Args:
+            excel_file: Path to Excel file with vendor data
+            shamrock_sheet: Sheet name for Shamrock data
+            sysco_sheet: Sheet name for SYSCO data
+
+        Returns:
+            Dictionary with match results
+        """
+        # Load data
+        shamrock_df = pd.read_excel(excel_file, sheet_name=shamrock_sheet)
+        sysco_df = pd.read_excel(excel_file, sheet_name=sysco_sheet)
+
+        # Run matching
+        return self.run_hybrid_vendor_match(shamrock_df, sysco_df)
+
+    def export_vendor_matches(self, output_file: str) -> str:
+        """
+        Export vendor match results to Excel
+
+        Args:
+            output_file: Path for output Excel file
+
+        Returns:
+            Path to exported file
+        """
+        df = self.hybrid_matcher.to_dataframe()
+
+        if df.empty:
+            return "No matches to export"
+
+        # Export with multiple sheets
+        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+            # All matches
+            df.to_excel(writer, sheet_name='All_Matches', index=False)
+
+            # High confidence only
+            high_conf = df[df['Confidence'] == 'HIGH']
+            if not high_conf.empty:
+                high_conf.to_excel(writer, sheet_name='High_Confidence', index=False)
+
+            # Needs review (medium/low but validated)
+            needs_review = df[(df['Confidence'].isin(['MEDIUM', 'LOW'])) &
+                            (df['Validation_Status'] == 'PASS')]
+            if not needs_review.empty:
+                needs_review.to_excel(writer, sheet_name='Needs_Review', index=False)
+
+            # Rejected (specification mismatch)
+            rejected = df[df['Confidence'] == 'REJECTED']
+            if not rejected.empty:
+                rejected.to_excel(writer, sheet_name='Rejected_Specs', index=False)
+
+            # Savings opportunities
+            savings = df[(df['Savings_per_lb'].notna()) & (df['Savings_per_lb'] > 0)]
+            if not savings.empty:
+                savings_sorted = savings.sort_values('Savings_per_lb', ascending=False)
+                savings_sorted.to_excel(writer, sheet_name='Savings_Opportunities', index=False)
+
+        return f"Exported vendor matches to {output_file}"
+
+    def _auto_categorize_products(self) -> Dict[str, str]:
+        """Auto-categorize products based on keywords"""
+        categories = {
+            'SPICE': ['PEPPER', 'GARLIC', 'ONION', 'SALT', 'PAPRIKA', 'CUMIN', 'OREGANO',
+                     'BASIL', 'THYME', 'ROSEMARY', 'CINNAMON', 'NUTMEG'],
+            'MEAT': ['BEEF', 'CHICKEN', 'PORK', 'TURKEY', 'LAMB', 'GROUND'],
+            'PRODUCE': ['LETTUCE', 'TOMATO', 'ONION', 'POTATO', 'CARROT', 'CELERY'],
+            'DAIRY': ['MILK', 'CHEESE', 'BUTTER', 'CREAM', 'YOGURT'],
+            'OIL': ['OIL', 'OLIVE', 'VEGETABLE', 'CANOLA'],
+            'SAUCE': ['SAUCE', 'KETCHUP', 'MUSTARD', 'MAYO', 'DRESSING']
+        }
+
+        category_map = {}
+        for match in self.hybrid_matcher.matches:
+            desc_upper = match.shamrock_description.upper()
+            category = 'Unknown'
+
+            for cat, keywords in categories.items():
+                if any(keyword in desc_upper for keyword in keywords):
+                    category = cat
+                    break
+
+            category_map[match.shamrock_description] = category
+
+        return category_map
+
     # ========== REPORTING ==========
-    
+
     def generate_executive_summary(self) -> str:
         """Generate comprehensive executive summary"""
         summary = []
