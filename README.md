@@ -1,169 +1,153 @@
-# The Lariat Bible 🤠
+# BEO Bible
 
-## Comprehensive Restaurant Management System
+## Banquet Event Order Management System
 
-A unified platform for managing all aspects of The Lariat restaurant operations in Fort Collins, Colorado.
+A comprehensive system for managing banquet events from booking through execution, with automated invoicing, kitchen preparation scheduling, and ingredient tracking.
 
-## 🎯 Project Vision
+## System Overview
 
-The Lariat Bible serves as the single source of truth for:
-- Vendor pricing and analysis
-- Inventory management
-- Recipe standardization and costing
-- Catering operations
-- Equipment maintenance
-- Financial reporting
-- Staff training and documentation
+The BEO Bible provides a complete workflow for restaurant banquet operations:
+- **Client Invoicing** with automated pricing and calculations
+- **Kitchen Prep Sheets** that auto-populate from invoices
+- **Production Scheduling** across multiple prep days
+- **Ingredient Scaling** from recipe database
+- **Vendor Ordering** with inventory management
+- **Event Execution** checklists and workflows
 
-## 📊 Key Metrics
-- **Monthly Catering Revenue**: $28,000
-- **Monthly Restaurant Revenue**: $20,000
-- **Potential Annual Savings** (Shamrock vs SYSCO): $52,000
+## Quick Start
 
-## 🗂️ Project Structure
+### For New Users
+1. Read [DOCUMENTATION/SYSTEM_OVERVIEW.md](DOCUMENTATION/SYSTEM_OVERVIEW.md) for a complete introduction
+2. Review [DOCUMENTATION/WORKFLOW.md](DOCUMENTATION/WORKFLOW.md) for the 10-step process
+3. Use the Invoice Template from `TEMPLATES/` for your first event
+
+### For Experienced Users
+1. Copy `TEMPLATES/Invoice_Template_MASTER.xlsx` to `ACTIVE_EVENTS/ClientName_Date/`
+2. Fill in client details and menu selections
+3. Generate kitchen prep sheet automatically
+4. Follow the production schedule for your event
+
+## Repository Structure
 
 ```
-lariat-bible/
-├── core/                   # Core functionality
-│   ├── database/          # Database models and connections
-│   ├── authentication/    # User authentication and permissions
-│   └── shared_utilities/  # Shared helper functions
-├── modules/               # Business logic modules
-│   ├── vendor_analysis/   # Vendor price comparison and optimization
-│   ├── inventory/         # Stock management and tracking
-│   ├── recipes/           # Recipe management and costing
-│   ├── catering/          # Catering operations and quotes
-│   ├── maintenance/       # Equipment maintenance schedules
-│   └── reporting/         # Business intelligence and reports
-├── web_interface/         # Web application frontend
-├── data/                  # Data storage
-│   └── invoices/         # Invoice images and OCR data
-├── documentation/         # Additional documentation
-└── tests/                # Test suites
+BEO-Bible/
+├── TEMPLATES/              # Master templates (don't edit directly)
+│   └── Invoice_Template_MASTER.xlsx
+│
+├── DOCUMENTATION/          # System guides and procedures
+│   ├── PROJECT_RULES.md              # System rules and specifications
+│   ├── WORKFLOW.md                   # 10-step detailed workflow
+│   ├── QA_CUSTOMIZATION_GUIDE.md     # Customization questions
+│   ├── SYSTEM_OVERVIEW.md            # Executive summary
+│   └── BUILD_COMPLETE.md             # Implementation roadmap
+│
+├── REFERENCE/              # Read-only reference materials
+│   ├── Recipe_Book.docx              # All recipes, sauces, brines
+│   ├── Order_Guide.xlsx              # Vendor products and pricing
+│   └── Ingredients_Master_List.xlsx  # Complete ingredient database
+│
+├── ACTIVE_EVENTS/          # Current events in progress
+│   └── ClientName_EventDate/
+│       ├── Invoice_v1.xlsx
+│       ├── Production_Schedule.xlsx
+│       ├── Ingredient_Orders.xlsx
+│       └── NOTES.txt
+│
+├── ARCHIVE/                # Completed events
+│   └── 2025/
+│       ├── 01_January/
+│       ├── 02_February/
+│       └── ...
+│
+└── ANALYTICS/              # Reports and metrics
+    ├── Monthly_Revenue_Report.xlsx
+    ├── Food_Cost_Analysis.xlsx
+    └── Client_Satisfaction_Tracker.xlsx
 ```
 
-## 🚀 Quick Start
+## Core Features
 
-### Prerequisites
-- Python 3.8+
-- Git
-- pip
+### Invoice Template
+- **Automated Pricing**: VLOOKUP formulas pull prices from master list
+- **Auto-Calculations**: Subtotals, tax (8.15%), service fee (20%)
+- **Minimum Spend Validation**: Ensures profitability
+- **53-Item Price List**: Complete menu with current pricing
 
-### Installation
+### Kitchen Prep Sheet
+- **Auto-Population**: Links directly from invoice sheet
+- **Prep Day Assignment**: Thursday/Friday/Saturday scheduling
+- **Task Details**: Specific prep instructions per item
+- **Service Timing**: Plating and serving specifications
 
-```bash
-# Clone the repository
-git clone https://github.com/[your-username]/lariat-bible.git
-cd lariat-bible
+### Production Workflow
+- **Thursday**: Long braises, stocks, sauces
+- **Friday**: Main prep, marinades, butchering
+- **Saturday**: Final prep and event execution
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+## Key Metrics
 
-# Install dependencies
-pip install -r requirements.txt
+- **Target Food Cost**: 30-35%
+- **Service Fee**: 20%
+- **Sales Tax**: 8.15%
+- **Minimum Event**: $500
+- **Typical Lead Time**: 7-14 days
+- **Standard Crew**: 3-5 people
 
-# Run initial setup
-python setup.py
-```
+## Getting Started
 
-### Basic Usage
+### Immediate Actions
+1. Review all documentation in `/DOCUMENTATION/`
+2. Familiarize yourself with the Invoice Template
+3. Answer customization questions in QA_CUSTOMIZATION_GUIDE.md
 
-```python
-# Example: Vendor price comparison
-from modules.vendor_analysis import VendorComparator
+### This Week
+1. Customize pricing in the template
+2. Add your recipes to REFERENCE/
+3. Update vendor information
+4. Train staff on the system
 
-comparator = VendorComparator()
-savings = comparator.compare_vendors('SYSCO', 'Shamrock Foods')
-print(f"Potential monthly savings: ${savings}")
-```
+### Next 2 Weeks
+1. Run a test event through the system
+2. Refine workflows based on feedback
+3. Establish metrics tracking
+4. Go live with real events
 
-## 📦 Modules Overview
+## Documentation
 
-### Vendor Analysis
-Automated price comparison between vendors with OCR invoice processing.
-- Invoice OCR and data extraction
-- Price trend analysis
-- Savings opportunity identification
+- **[SYSTEM_OVERVIEW.md](DOCUMENTATION/SYSTEM_OVERVIEW.md)**: Executive summary and key features
+- **[WORKFLOW.md](DOCUMENTATION/WORKFLOW.md)**: Complete 10-step process with timelines
+- **[PROJECT_RULES.md](DOCUMENTATION/PROJECT_RULES.md)**: System specifications and formulas
+- **[QA_CUSTOMIZATION_GUIDE.md](DOCUMENTATION/QA_CUSTOMIZATION_GUIDE.md)**: 30 questions to customize the system
+- **[BUILD_COMPLETE.md](DOCUMENTATION/BUILD_COMPLETE.md)**: Implementation roadmap and training
 
-### Inventory Management
-Real-time inventory tracking and automated reordering.
-- Stock level monitoring
-- Expiration date tracking
-- Automated purchase order generation
+## Support & Customization
 
-### Recipe Management
-Standardized recipes with automatic cost calculation.
-- Recipe scaling for different serving sizes
-- Ingredient cost tracking
-- Margin analysis
+This system is designed to be customizable for your specific operation. Use the QA Customization Guide to tailor:
+- Pricing and margins
+- Menu offerings
+- Prep schedules
+- Vendor preferences
+- Staff workflows
 
-### Catering Operations
-Streamlined catering workflow from quote to execution.
-- Quick quote generator
-- Event planning tools
-- Profit margin calculator (Target: 45%)
+## Success Metrics
 
-### Maintenance Tracking
-Equipment maintenance scheduling and history.
-- Preventive maintenance schedules
-- Repair history logging
-- Vendor contact management
+Track these KPIs for continuous improvement:
+- Event profitability (target: 45% margin)
+- Food cost percentage (target: 30-35%)
+- Client satisfaction scores
+- Prep time accuracy
+- Waste percentage
+- Repeat booking rate
 
-### Reporting Dashboard
-Comprehensive business intelligence and analytics.
-- Daily/weekly/monthly sales reports
-- Labor cost analysis
-- Profit margin tracking
+## Version Control
 
-## 🔧 Configuration
-
-Copy `.env.example` to `.env` and configure:
-
-```env
-DATABASE_URL=sqlite:///lariat.db
-SECRET_KEY=your-secret-key
-INVOICE_STORAGE_PATH=./data/invoices
-```
-
-## 📈 Development Roadmap
-
-### Phase 1: Foundation (Current)
-- [x] Project structure setup
-- [ ] Database schema design
-- [ ] Core utilities implementation
-
-### Phase 2: Vendor Analysis
-- [ ] OCR pipeline for invoices
-- [ ] Price comparison engine
-- [ ] Savings report generator
-
-### Phase 3: Inventory & Recipes
-- [ ] Inventory tracking system
-- [ ] Recipe database
-- [ ] Cost calculation engine
-
-### Phase 4: Web Interface
-- [ ] Dashboard creation
-- [ ] Mobile-responsive design
-- [ ] Real-time updates
-
-## 🤝 Contributing
-
-This is a private repository for The Lariat restaurant operations.
-
-## 📝 License
-
-Proprietary - The Lariat Restaurant, Fort Collins, CO
-
-## 👤 Owner
-
-**Sean** - Restaurant Owner & Operator
-
-## 🆘 Support
-
-For questions or issues, contact Sean directly.
+- Keep master templates unchanged
+- Create new versions for each client revision
+- Archive completed events monthly
+- Document system changes in NOTES.txt
 
 ---
 
-*Building a data-driven future for The Lariat, one module at a time.*
+**Built for efficient banquet operations from booking to execution**
+
+*Last Updated: 2025-11-19*
