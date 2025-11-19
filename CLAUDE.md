@@ -195,6 +195,31 @@ PORT=5000
 - `generate_report(output_path)` - Create formatted report
 - `calculate_margin_impact(monthly_savings)` - Impact on margins
 
+**NEW: Hybrid Vendor Matcher** (`hybrid_matcher.py`)
+
+The most powerful tool for vendor comparison - combines automated fuzzy matching with critical specification validation.
+
+**Key Class**: `HybridVendorMatcher`
+- `match_all(shamrock_df, sysco_df)` - Match all products with validation
+- `to_dataframe()` - Export matches to DataFrame
+- `to_ingredients()` - Convert matches to Ingredient objects
+- `get_savings_summary()` - Calculate total savings potential
+
+**Features**:
+- **Fuzzy Matching**: Automated text similarity (handles typos, variations)
+- **Specification Validation**: REJECTS mismatches (Fine ≠ Coarse pepper)
+- **Pack Size Intelligence**: Correctly interprets Shamrock vs SYSCO formats
+- **Confidence Scoring**: HIGH/MEDIUM/LOW/REJECTED
+- **Direct Integration**: Outputs to Ingredient dataclass
+
+**Workflow**:
+1. Load vendor data (Excel, CSV, or DataFrame)
+2. Fuzzy match finds candidates (similarity scoring)
+3. Specification validator checks for critical mismatches
+4. Pack size parser calculates unit prices
+5. Results ranked by confidence and savings
+6. High-confidence matches → Ingredient objects
+
 **Vendor Data**:
 - Shamrock Foods: 29.5% average discount vs SYSCO
 - Monthly savings potential: ~$4,333
@@ -366,7 +391,7 @@ result = lariat_bible.create_recipe_with_costing(recipe)
 # Returns cost per portion, vendor analysis, suggested price
 ```
 
-### Running Vendor Comparison
+### Running Vendor Comparison (Legacy)
 ```python
 from modules.core.lariat_bible import lariat_bible
 
@@ -379,6 +404,59 @@ lariat_bible.import_order_guides(
 # Run comprehensive comparison
 results = lariat_bible.run_comprehensive_comparison()
 # Exports to data/vendor_comparison.xlsx
+```
+
+### Running Hybrid Vendor Matching (RECOMMENDED)
+```python
+from modules.core.lariat_bible import lariat_bible
+
+# Method 1: Direct from Excel file
+results = lariat_bible.import_and_match_vendors(
+    excel_file="data/vendor_data.xlsx",
+    shamrock_sheet="Shamrock_Data",
+    sysco_sheet="Sysco_Data"
+)
+
+print(f"Total matches: {results['total_matches']}")
+print(f"Ingredients added: {results['ingredients_added']}")
+print(f"Estimated monthly savings: ${results['savings_summary']['estimated_monthly_savings']:.2f}")
+
+# Export results to Excel
+lariat_bible.export_vendor_matches("data/hybrid_match_results.xlsx")
+
+# Access the matched ingredients
+for ingredient_id, ingredient in lariat_bible.ingredients.items():
+    if ingredient.preferred_vendor == "Shamrock Foods":
+        print(f"{ingredient.name}: Save ${ingredient.price_difference:.2f}/lb")
+```
+
+### Method 2: Using HybridVendorMatcher Directly
+```python
+from modules.vendor_analysis import HybridVendorMatcher
+import pandas as pd
+
+# Load vendor data
+shamrock_df = pd.read_excel("vendor_data.xlsx", sheet_name="Shamrock_Data")
+sysco_df = pd.read_excel("vendor_data.xlsx", sheet_name="Sysco_Data")
+
+# Create matcher and run
+matcher = HybridVendorMatcher()
+matches = matcher.match_all(shamrock_df, sysco_df)
+
+# Get results
+df = matcher.to_dataframe()
+
+# Filter high-confidence matches
+high_conf = df[df['Confidence'] == 'HIGH']
+print(f"High confidence matches: {len(high_conf)}")
+
+# Check for specification rejections
+rejected = df[df['Confidence'] == 'REJECTED']
+print(f"Rejected due to spec mismatch: {len(rejected)}")
+
+# Get savings summary
+savings = matcher.get_savings_summary()
+print(f"Estimated annual savings: ${savings['estimated_annual_savings']:,.2f}")
 ```
 
 ### Optimizing Menu Pricing
@@ -530,13 +608,27 @@ pytest -v
 5. Link to menu item (if applicable)
 6. Export recipe card
 
-### Task 3: Generate Vendor Comparison Report
-1. Import current order guides from both vendors
-2. Run product matching (verify accuracy!)
-3. Calculate category-level savings
-4. Identify top savings opportunities
-5. Generate executive summary
-6. Export to Excel/PDF
+### Task 3: Generate Vendor Comparison Report (Using Hybrid Matcher)
+1. Prepare Excel file with two sheets:
+   - `Shamrock_Data`: columns = sku, description, price, pack
+   - `Sysco_Data`: columns = sku, description, price, pack
+2. Run hybrid matching:
+   ```python
+   results = lariat_bible.import_and_match_vendors("vendor_data.xlsx")
+   ```
+3. Review results:
+   - HIGH confidence → Auto-approve
+   - MEDIUM/LOW → Manual review required
+   - REJECTED → Specification mismatch (DO NOT USE)
+4. Export detailed report:
+   ```python
+   lariat_bible.export_vendor_matches("comparison_results.xlsx")
+   ```
+5. Check savings summary:
+   ```python
+   print(results['savings_summary'])
+   ```
+6. Approved ingredients are automatically added to system
 
 ### Task 4: Optimize Menu Pricing
 1. Ensure all menu items have linked recipes
@@ -639,6 +731,13 @@ pytest -v
    - Products only available from one vendor
    - Zero quantities or prices
    - Seasonal availability
+
+9. **Use Hybrid Matcher for Vendor Comparisons**:
+   - ALWAYS use `HybridVendorMatcher` for new vendor comparisons
+   - NEVER bypass specification validation (it prevents costly mistakes)
+   - REVIEW all REJECTED matches (they failed for good reasons)
+   - TRUST HIGH confidence matches
+   - MANUALLY VERIFY MEDIUM/LOW confidence matches
 
 ### Common Pitfalls to Avoid
 
