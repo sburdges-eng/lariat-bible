@@ -83,6 +83,10 @@ data/invoices/*.png
 data/invoices/*.pdf
 data/invoices/processed/
 
+# WiFi configuration (may contain passwords)
+data/wifi_config.json
+data/portal_config.json
+
 # Temporary files
 tmp/
 temp/

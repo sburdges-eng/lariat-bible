@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lariat Bible - Restaurant Management System</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/wifi.css">
+</head>
+<body>
+    <!-- WiFi Status Bar -->
+    <div id="wifi-status-bar" class="wifi-status-bar">
+        <div class="wifi-indicator">
+            <span class="wifi-icon" id="wifi-icon">📶</span>
+            <span class="wifi-text" id="wifi-status">Connected</span>
+        </div>
+        <div class="wifi-controls">
+            <button id="wifi-settings-btn" class="btn-icon">⚙️</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>🤠 The Lariat Bible</h1>
+                <p class="subtitle">Fort Collins Restaurant Management</p>
+            </div>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-btn" data-tab="vendors">Vendors</button>
+                <button class="tab-btn" data-tab="recipes">Recipes</button>
+                <button class="tab-btn" data-tab="menu">Menu</button>
+                <button class="tab-btn" data-tab="equipment">Equipment</button>
+                <button class="tab-btn" data-tab="wifi">WiFi Manager</button>
+            </nav>
+        </header>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>💰 Annual Savings</h3>
+                    <div class="metric-value" id="annual-savings">$52,000</div>
+                    <p class="metric-label">Vendor Optimization</p>
+                </div>
+                <div class="card">
+                    <h3>📦 Vendors</h3>
+                    <div class="metric-value" id="vendor-count">2</div>
+                    <p class="metric-label">SYSCO & Shamrock</p>
+                </div>
+                <div class="card">
+                    <h3>🍽️ Recipes</h3>
+                    <div class="metric-value" id="recipe-count">-</div>
+                    <p class="metric-label">Active Recipes</p>
+                </div>
+                <div class="card">
+                    <h3>📋 Menu Items</h3>
+                    <div class="metric-value" id="menu-count">-</div>
+                    <p class="metric-label">Current Menu</p>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <h3>📊 System Status</h3>
+                <div id="system-status" class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Backend API</span>
+                        <span class="status-badge" id="api-status">🔴 Offline</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Database</span>
+                        <span class="status-badge" id="db-status">🔴 Not Connected</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">WiFi Network</span>
+                        <span class="status-badge" id="network-status">🟡 Checking...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vendors Tab -->
+        <div id="vendors-tab" class="tab-content">
+            <div class="card">
+                <h3>🏢 Vendor Comparison</h3>
+                <div class="vendor-comparison" id="vendor-comparison">
+                    <p>Loading vendor data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recipes Tab -->
+        <div id="recipes-tab" class="tab-content">
+            <div class="card">
+                <h3>📖 Recipe Management</h3>
+                <div class="recipe-controls">
+                    <button class="btn btn-primary" id="add-recipe-btn">+ Add Recipe</button>
+                    <input type="search" id="recipe-search" placeholder="Search recipes..." class="search-input">
+                </div>
+                <div id="recipe-list" class="recipe-list">
+                    <p>Loading recipes...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Tab -->
+        <div id="menu-tab" class="tab-content">
+            <div class="card">
+                <h3>🍴 Menu Pricing</h3>
+                <div class="menu-controls">
+                    <button class="btn btn-primary" id="add-menu-item-btn">+ Add Menu Item</button>
+                </div>
+                <div id="menu-list" class="menu-list">
+                    <p>Loading menu items...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment Tab -->
+        <div id="equipment-tab" class="tab-content">
+            <div class="card">
+                <h3>🔧 Equipment Tracker</h3>
+                <div class="equipment-controls">
+                    <button class="btn btn-primary" id="add-equipment-btn">+ Add Equipment</button>
+                </div>
+                <div id="equipment-list" class="equipment-list">
+                    <p>Loading equipment...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- WiFi Manager Tab -->
+        <div id="wifi-tab" class="tab-content">
+            <div class="wifi-manager">
+                <!-- Network Configuration -->
+                <div class="card">
+                    <h3>📡 Network Configuration</h3>
+                    <div class="wifi-config">
+                        <div class="form-group">
+                            <label>Network Name (SSID)</label>
+                            <input type="text" id="wifi-ssid" class="form-control" placeholder="The Lariat Guest WiFi">
+                        </div>
+                        <div class="form-group">
+                            <label>Network Password</label>
+                            <input type="password" id="wifi-password" class="form-control" placeholder="Enter WiFi password">
+                        </div>
+                        <div class="form-group">
+                            <label>Network Type</label>
+                            <select id="wifi-type" class="form-control">
+                                <option value="guest">Guest Network</option>
+                                <option value="staff">Staff Network</option>
+                                <option value="pos">POS Systems</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="save-wifi-config">Save Configuration</button>
+                    </div>
+                </div>
+
+                <!-- Captive Portal -->
+                <div class="card">
+                    <h3>🌐 Captive Portal Settings</h3>
+                    <div class="portal-config">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enable-captive-portal">
+                                Enable Captive Portal for Guest WiFi
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>Welcome Message</label>
+                            <textarea id="portal-message" class="form-control" rows="3" placeholder="Welcome to The Lariat! Free WiFi for our guests."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Redirect URL (after login)</label>
+                            <input type="url" id="portal-redirect" class="form-control" placeholder="https://thelariat.com">
+                        </div>
+                        <button class="btn btn-primary" id="save-portal-config">Save Portal Settings</button>
+                    </div>
+                </div>
+
+                <!-- Connected Devices -->
+                <div class="card">
+                    <h3>📱 Connected Devices</h3>
+                    <div class="device-list" id="connected-devices">
+                        <div class="device-item">
+                            <span class="device-name">Kitchen POS #1</span>
+                            <span class="device-ip">192.168.1.101</span>
+                            <span class="device-status online">Online</span>
+                        </div>
+                        <div class="device-item">
+                            <span class="device-name">Bar POS #2</span>
+                            <span class="device-ip">192.168.1.102</span>
+                            <span class="device-status online">Online</span>
+                        </div>
+                        <div class="device-item">
+                            <span class="device-name">Guest-Device-A3F2</span>
+                            <span class="device-ip">192.168.1.203</span>
+                            <span class="device-status online">Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Statistics -->
+                <div class="card">
+                    <h3>📊 Network Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value" id="total-devices">3</span>
+                            <span class="stat-label">Connected Devices</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="bandwidth-usage">45 MB/s</span>
+                            <span class="stat-label">Current Bandwidth</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="uptime">99.8%</span>
+                            <span class="stat-label">Uptime (30 days)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WiFi Settings Modal -->
+    <div id="wifi-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>⚙️ Quick WiFi Settings</h2>
+            <div class="modal-body">
+                <div class="network-scan" id="network-scan">
+                    <h4>Available Networks</h4>
+                    <div class="network-item" data-ssid="The Lariat Guest WiFi">
+                        <span class="signal-strength">📶📶📶📶</span>
+                        <span class="network-name">The Lariat Guest WiFi</span>
+                        <span class="network-security">🔒</span>
+                    </div>
+                    <div class="network-item" data-ssid="The Lariat Staff">
+                        <span class="signal-strength">📶📶📶📶</span>
+                        <span class="network-name">The Lariat Staff</span>
+                        <span class="network-security">🔒</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block" id="scan-networks">🔄 Scan for Networks</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/wifi.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

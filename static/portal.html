@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to The Lariat - Guest WiFi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .portal-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .portal-header {
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .portal-logo {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .portal-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .portal-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .portal-body {
+            padding: 40px 30px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-message h2 {
+            color: #8B4513;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .welcome-message p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            background: #F5F5DC;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #8B4513;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            font-size: 1.2rem;
+        }
+
+        .connect-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);
+        }
+
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+
+        .connect-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .portal-footer {
+            background: #F5F5DC;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .portal-footer a {
+            color: #8B4513;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .portal-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #C8E6C9;
+            color: #2E7D32;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message h3 {
+            margin-bottom: 10px;
+        }
+
+        .network-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 2px solid #8B4513;
+        }
+
+        .network-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .network-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .network-info-label {
+            color: #666;
+        }
+
+        .network-info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .portal-header {
+                padding: 30px 20px;
+            }
+
+            .portal-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .portal-body {
+                padding: 30px 20px;
+            }
+
+            .portal-logo {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="portal-container">
+        <div class="portal-header">
+            <div class="portal-logo">🤠</div>
+            <h1>The Lariat</h1>
+            <p>Fort Collins, Colorado</p>
+        </div>
+
+        <div class="portal-body">
+            <div id="success-msg" class="success-message">
+                <h3>✓ Connected Successfully!</h3>
+                <p>You are now connected to The Lariat Guest WiFi</p>
+                <p id="redirect-msg"></p>
+            </div>
+
+            <div id="connect-section">
+                <div class="welcome-message">
+                    <h2>Welcome to Our Free WiFi!</h2>
+                    <p>Thanks for visiting The Lariat. Enjoy complimentary high-speed internet while you dine with us.</p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-item">
+                        <span class="info-icon">📶</span>
+                        <span>Network: <strong>The Lariat Guest WiFi</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">⚡</span>
+                        <span>Speed: Up to 100 Mbps</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🔒</span>
+                        <span>Secure Connection</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">⏱️</span>
+                        <span>Unlimited Duration</span>
+                    </div>
+                </div>
+
+                <div class="network-info">
+                    <div class="network-info-item">
+                        <span class="network-info-label">Connection Status:</span>
+                        <span class="network-info-value">⚡ Ready to Connect</span>
+                    </div>
+                    <div class="network-info-item">
+                        <span class="network-info-label">Signal Strength:</span>
+                        <span class="network-info-value">📶 Excellent</span>
+                    </div>
+                </div>
+
+                <form id="connect-form" class="connect-form">
+                    <div class="form-group" style="margin-top: 25px;">
+                        <label for="user-name">Name (Optional)</label>
+                        <input type="text" id="user-name" placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">
+                            I agree to use this network responsibly and accept the
+                            <a href="#" style="color: #8B4513;">Terms of Service</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="connect-btn">
+                        🌐 Connect to WiFi
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="portal-footer">
+            <p>&copy; 2025 The Lariat Restaurant</p>
+            <p>
+                <a href="https://thelariat.com">Visit Our Website</a> |
+                <a href="tel:+19705551234">Call Us</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const connectForm = document.getElementById('connect-form');
+        const connectSection = document.getElementById('connect-section');
+        const successMsg = document.getElementById('success-msg');
+        const redirectMsg = document.getElementById('redirect-msg');
+
+        connectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userName = document.getElementById('user-name').value;
+            const termsAccepted = document.getElementById('terms').checked;
+
+            if (!termsAccepted) {
+                alert('Please accept the Terms of Service to continue');
+                return;
+            }
+
+            // Disable button while connecting
+            const connectBtn = connectForm.querySelector('.connect-btn');
+            connectBtn.disabled = true;
+            connectBtn.textContent = '🔄 Connecting...';
+
+            try {
+                // Send connection request to backend
+                const response = await fetch('/portal/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: userName,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show success message
+                    connectSection.style.display = 'none';
+                    successMsg.style.display = 'block';
+
+                    // Redirect after 3 seconds
+                    const redirect = data.redirect || 'https://thelariat.com';
+                    redirectMsg.textContent = `Redirecting to ${redirect} in 3 seconds...`;
+
+                    setTimeout(() => {
+                        window.location.href = redirect;
+                    }, 3000);
+                } else {
+                    throw new Error(data.message || 'Connection failed');
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                alert('Connection failed. Please try again.');
+                connectBtn.disabled = false;
+                connectBtn.textContent = '🌐 Connect to WiFi';
+            }
+        });
+
+        // Auto-check network status
+        async function checkNetworkStatus() {
+            try {
+                const response = await fetch('/api/wifi/stats');
+                const data = await response.json();
+                console.log('Network stats:', data);
+            } catch (error) {
+                console.log('Running in standalone mode');
+            }
+        }
+
+        checkNetworkStatus();
+    </script>
+</body>
+</html>
