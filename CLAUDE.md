@@ -269,15 +269,42 @@ def calculate_best_price(self):
 
 ### 3. Product Matching Rules
 
-**See `PRODUCT_MATCHING_VERIFICATION.md` for critical guidelines**
+**⚠️ CRITICAL: See `PREVENTING_PRODUCT_MATCH_ERRORS.md` for comprehensive safeguard system**
 
-Key points:
+**Also see**: `PRODUCT_MATCHING_VERIFICATION.md` for verification checklist
+
+Product matching errors can invalidate entire savings calculations. The system uses multiple layers of defense:
+
+**Enforced Rules**:
 - **NEVER match different product specifications**
-  - ❌ "Black Pepper Fine" ≠ "Black Pepper Coarse"
-  - ❌ "Garlic Powder" ≠ "Garlic Granulated"
+  - ❌ "Black Pepper Fine" ≠ "Black Pepper Coarse" (different culinary uses)
+  - ❌ "Garlic Powder" ≠ "Garlic Granulated" (different textures)
 - Match by BOTH product code AND description
 - Verify grind size, pack size, and quality specifications
-- Document any assumptions in code comments
+- Document any assumptions in `notes` field
+
+**Implementation** (`accurate_matcher.py:10-30`):
+```python
+@dataclass
+class ProductMatch:
+    product_name: str
+    specification: str  # REQUIRED: Fine, Coarse, Cracked, etc.
+
+    sysco_code: str
+    sysco_description: str  # Full description for validation
+
+    shamrock_code: str
+    shamrock_description: str  # Full description for validation
+
+    notes: str  # Document WHY this is a match
+```
+
+**Validation Layers**:
+1. ✅ Data structure enforcement (specification required)
+2. ✅ Separate ProductMatch per specification
+3. ❌ Automated validation (to implement - see PREVENTING_PRODUCT_MATCH_ERRORS.md)
+4. ❌ Human verification workflow (to implement)
+5. ❌ Unit tests for matching (to implement)
 
 ### 4. Margin Calculations
 
@@ -731,7 +758,8 @@ pip freeze > requirements.txt      # Update
 ## Additional Resources
 
 - **README.md**: User-facing project overview and quick start
-- **PRODUCT_MATCHING_VERIFICATION.md**: Critical product matching rules
+- **PREVENTING_PRODUCT_MATCH_ERRORS.md**: ⚠️ Comprehensive safeguard system for accurate product matching
+- **PRODUCT_MATCHING_VERIFICATION.md**: Manual verification checklist for product matches
 - **GITHUB_SETUP.md**: Repository configuration guide
 - **requirements.txt**: Definitive list of dependencies
 
@@ -746,5 +774,9 @@ pip freeze > requirements.txt      # Update
 ---
 
 **Last Updated**: 2025-11-19
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Maintained by**: AI Assistant (Claude)
+
+**Changelog**:
+- v1.1.0 (2025-11-19): Added comprehensive product matching error prevention system
+- v1.0.0 (2025-11-19): Initial CLAUDE.md creation with full codebase documentation
