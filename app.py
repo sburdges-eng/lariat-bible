@@ -28,6 +28,11 @@ except ImportError:
 @app.route('/')
 def index():
     """Main dashboard"""
+    return render_template('dashboard.html')
+
+@app.route('/api/dashboard')
+def dashboard_data():
+    """API endpoint for dashboard data"""
     return jsonify({
         'message': 'Welcome to The Lariat Bible',
         'status': 'operational',
@@ -112,8 +117,34 @@ def list_modules():
             'description': 'Business intelligence and analytics'
         }
     ]
-    
+
     return jsonify(modules)
+
+# HTML Routes for different pages
+@app.route('/vendor-analysis')
+def vendor_analysis_page():
+    """Vendor analysis page"""
+    return render_template('dashboard.html')  # Will create specific page later
+
+@app.route('/inventory')
+def inventory_page():
+    """Inventory management page"""
+    return render_template('dashboard.html')  # Will create specific page later
+
+@app.route('/recipes')
+def recipes_page():
+    """Recipe management page"""
+    return render_template('dashboard.html')  # Will create specific page later
+
+@app.route('/catering')
+def catering_page():
+    """Catering operations page"""
+    return render_template('dashboard.html')  # Will create specific page later
+
+@app.route('/reports')
+def reports_page():
+    """Reports dashboard page"""
+    return render_template('dashboard.html')  # Will create specific page later
 
 if __name__ == '__main__':
     host = os.getenv('HOST', '127.0.0.1')

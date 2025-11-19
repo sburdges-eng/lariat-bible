@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - The Lariat Bible{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="page-title">Welcome Back, Chef!</h1>
+            <p class="page-subtitle">Here's what's happening with your restaurant today</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                New Order
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-download"></i>
+                Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card stat-revenue">
+            <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Monthly Revenue</div>
+                <div class="stat-value" id="monthlyRevenue">$48,000</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 12.5% from last month
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-savings">
+            <div class="stat-icon">
+                <i class="fas fa-piggy-bank"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Potential Savings</div>
+                <div class="stat-value" id="potentialSavings">$52,000</div>
+                <div class="stat-change neutral">
+                    <i class="fas fa-info-circle"></i> Annual projection
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-catering">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Catering Events</div>
+                <div class="stat-value" id="cateringEvents">12</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> 3 this week
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-efficiency">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Efficiency Score</div>
+                <div class="stat-value" id="efficiencyScore">87%</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> +5% improvement
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+        <!-- Vendor Comparison -->
+        <div class="card card-vendor-comparison">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-balance-scale"></i>
+                    Vendor Comparison
+                </h3>
+                <button class="btn-link">View Details</button>
+            </div>
+            <div class="card-body">
+                <div class="vendor-comparison">
+                    <div class="vendor-item">
+                        <div class="vendor-logo shamrock">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="vendor-info">
+                            <div class="vendor-name">Shamrock Foods</div>
+                            <div class="vendor-price">$3.45 / lb avg</div>
+                            <div class="vendor-badge best">Best Price</div>
+                        </div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="vendor-item">
+                        <div class="vendor-logo sysco">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="vendor-info">
+                            <div class="vendor-name">SYSCO</div>
+                            <div class="vendor-price">$4.12 / lb avg</div>
+                            <div class="vendor-badge">Higher Cost</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="savings-highlight">
+                    <div class="savings-amount">$4,333</div>
+                    <div class="savings-label">Monthly Savings with Shamrock</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card card-activity">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
+                </h3>
+                <button class="btn-link">View All</button>
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Order #1234 Completed</div>
+                            <div class="activity-time">2 minutes ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon warning">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Low Stock Alert: Black Pepper</div>
+                            <div class="activity-time">15 minutes ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon info">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Catering Event Tomorrow</div>
+                            <div class="activity-time">1 hour ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Invoice Paid: $1,245</div>
+                            <div class="activity-time">3 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card card-quick-actions">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions-grid">
+                    <button class="quick-action-btn">
+                        <i class="fas fa-cart-plus"></i>
+                        <span>Place Order</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Check Inventory</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-receipt"></i>
+                        <span>View Invoices</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-book-open"></i>
+                        <span>Recipe Book</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-calculator"></i>
+                        <span>Cost Calculator</span>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Modules -->
+        <div class="card card-modules">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-puzzle-piece"></i>
+                    System Modules
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="modules-list" id="modulesList">
+                    <!-- Modules will be dynamically loaded -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Loading modules...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Load dashboard data
+    async function loadDashboardData() {
+        try {
+            const response = await fetch('/api/modules');
+            const modules = await response.json();
+
+            const modulesList = document.getElementById('modulesList');
+            modulesList.innerHTML = modules.map(module => `
+                <div class="module-item ${module.status}">
+                    <div class="module-icon">
+                        <i class="fas fa-${getModuleIcon(module.name)}"></i>
+                    </div>
+                    <div class="module-info">
+                        <div class="module-name">${module.name}</div>
+                        <div class="module-description">${module.description}</div>
+                    </div>
+                    <div class="module-status">
+                        <span class="status-badge ${module.status}">${module.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading modules:', error);
+        }
+    }
+
+    function getModuleIcon(moduleName) {
+        const icons = {
+            'Vendor Analysis': 'chart-line',
+            'Inventory Management': 'boxes',
+            'Recipe Management': 'utensils',
+            'Catering Operations': 'calendar-alt',
+            'Maintenance Tracking': 'tools',
+            'Reporting Dashboard': 'chart-pie'
+        };
+        return icons[moduleName] || 'cube';
+    }
+
+    // Load data on page load
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
+</script>
+{% endblock %}
