@@ -6,6 +6,8 @@ Handles vendor comparison, price analysis, and savings calculations.
 
 from flask import Blueprint, jsonify, current_app, request
 from datetime import datetime
+from validators import VendorComparisonSchema, PaginationSchema
+from utils import validate_query_params, error_response, success_response
 
 vendor_bp = Blueprint('vendor', __name__)
 
@@ -18,27 +20,25 @@ except ImportError:
 
 
 @vendor_bp.route('/comparison')
-def vendor_comparison():
+@validate_query_params(VendorComparisonSchema)
+def vendor_comparison(validated_params):
     """
     Compare prices between two vendors.
 
     Query Parameters:
-        vendor1 (str): Name of first vendor (default: 'Shamrock Foods')
-        vendor2 (str): Name of second vendor (default: 'SYSCO')
+        vendor1 (str): Name of first vendor (required)
+        vendor2 (str): Name of second vendor (required)
 
     Returns:
         JSON response with savings analysis and margin impact
     """
     if not vendor_comparator:
         current_app.logger.error('Vendor analysis module not available')
-        return jsonify({
-            'error': 'Vendor analysis module not available',
-            'status': 503
-        }), 503
+        return error_response('Vendor analysis module not available', status=503)
 
-    # Get vendor names from query parameters or use defaults
-    vendor1 = request.args.get('vendor1', 'Shamrock Foods')
-    vendor2 = request.args.get('vendor2', 'SYSCO')
+    # Get validated vendor names
+    vendor1 = validated_params.get('vendor1', 'Shamrock Foods')
+    vendor2 = validated_params.get('vendor2', 'SYSCO')
 
     try:
         # Calculate savings
@@ -49,7 +49,7 @@ def vendor_comparison():
             f'Vendor comparison: {vendor1} vs {vendor2} - ${savings:.2f} monthly savings'
         )
 
-        return jsonify({
+        return success_response({
             'vendors': {
                 'vendor1': vendor1,
                 'vendor2': vendor2
@@ -64,11 +64,11 @@ def vendor_comparison():
 
     except Exception as e:
         current_app.logger.error(f'Error in vendor comparison: {str(e)}', exc_info=True)
-        return jsonify({
-            'error': 'Error calculating vendor comparison',
-            'message': str(e),
-            'status': 500
-        }), 500
+        return error_response(
+            'Error calculating vendor comparison',
+            errors={'detail': str(e)},
+            status=500
+        )
 
 
 @vendor_bp.route('/list')
