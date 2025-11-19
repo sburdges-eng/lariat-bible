@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The Lariat Bible - Interactive Tools & Features">
+    <title>Tools & Features | The Lariat Bible</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/interactive.css">
+    <link rel="stylesheet" href="/static/css/advanced.css">
+
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-lasso"></i>
+                <span>The Lariat Bible</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    Home
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard
+                </a>
+                <a href="/tools" class="nav-item active">
+                    <i class="fas fa-tools"></i>
+                    Tools
+                </a>
+                <a href="#vendors" class="nav-item">
+                    <i class="fas fa-truck"></i>
+                    Vendors
+                </a>
+                <a href="#recipes" class="nav-item">
+                    <i class="fas fa-utensils"></i>
+                    Recipes
+                </a>
+                <a href="#catering" class="nav-item">
+                    <i class="fas fa-calendar-check"></i>
+                    Catering
+                </a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-icon" id="notificationBtn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                <button class="btn-icon" id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Header Section -->
+        <header class="page-header">
+            <div>
+                <h1>Interactive Tools & Features</h1>
+                <p class="subtitle">Powerful tools to streamline your restaurant operations</p>
+            </div>
+            <div class="header-actions">
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="fas fa-chart-bar"></i>
+                    View Dashboard
+                </a>
+            </div>
+        </header>
+
+        <!-- Inventory Alerts -->
+        <section class="card" style="margin-bottom: var(--spacing-xl);">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Inventory Alerts & Management
+                </h2>
+                <button class="btn-link" onclick="window.inventoryAlerts.checkAlerts()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="inventoryAlerts"></div>
+            </div>
+        </section>
+
+        <!-- Invoice Upload -->
+        <section class="card" style="margin-bottom: var(--spacing-xl);">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-file-upload"></i>
+                    Invoice Upload & OCR Processing
+                </h2>
+                <button class="btn-link" onclick="alert('Upload invoices in PDF, JPG, or PNG format for automatic processing')">
+                    <i class="fas fa-question-circle"></i> Help
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="invoiceUploader"></div>
+            </div>
+        </section>
+
+        <!-- Quote Generator -->
+        <section class="card" style="margin-bottom: var(--spacing-xl);">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    Catering Quote Generator
+                </h2>
+                <button class="btn-link" onclick="window.quoteGen.loadSampleQuote()">
+                    <i class="fas fa-flask"></i> Load Sample
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="quoteGenerator"></div>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section style="margin-top: var(--spacing-2xl);">
+            <h2 style="margin-bottom: var(--spacing-lg);">
+                <i class="fas fa-star"></i>
+                All Features
+            </h2>
+
+            <div class="content-grid">
+                <!-- Feature Cards -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-chart-line"></i>
+                            Interactive Charts
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Real-time data visualization with Chart.js including revenue trends, cost analysis, and vendor performance metrics.</p>
+                        <a href="/dashboard" class="btn btn-primary" style="margin-top: var(--spacing-md); width: 100%;">
+                            View Charts
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-calculator"></i>
+                            Cost Calculator
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Calculate recipe costs in real-time with automatic per-serving calculations and menu pricing suggestions.</p>
+                        <a href="/dashboard" class="btn btn-primary" style="margin-top: var(--spacing-md); width: 100%;">
+                            Use Calculator
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-table"></i>
+                            Vendor Comparison
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Sortable, filterable vendor comparison table with real-time search and CSV export capabilities.</p>
+                        <a href="/dashboard" class="btn btn-primary" style="margin-top: var(--spacing-md); width: 100%;">
+                            Compare Vendors
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-file-pdf"></i>
+                            PDF Export
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Generate professional PDF quotes for catering events with automatic calculations and branding.</p>
+                        <button class="btn btn-primary" onclick="window.quoteGen.loadSampleQuote(); setTimeout(() => window.quoteGen.generatePDF(), 500);" style="margin-top: var(--spacing-md); width: 100%;">
+                            Generate Sample PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-bell"></i>
+                            Smart Alerts
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Automatic notifications for low stock, critical inventory levels, and important business events.</p>
+                        <button class="btn btn-primary" onclick="notifications.show('Demo alert: Olive Oil is low in stock!', 'warning')" style="margin-top: var(--spacing-md); width: 100%;">
+                            Test Alert
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-download"></i>
+                            Data Export
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Export your data to CSV, PDF, or print directly from any table or report in the system.</p>
+                        <a href="/dashboard" class="btn btn-primary" style="margin-top: var(--spacing-md); width: 100%;">
+                            Export Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips Section -->
+        <section class="card" style="margin-top: var(--spacing-2xl); background: linear-gradient(135deg, #dbeafe, #eff6ff);">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-lightbulb"></i>
+                    Pro Tips
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon blue">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p><strong>Drag and drop multiple invoices at once</strong></p>
+                            <span class="activity-time">The system processes them in parallel for faster uploads</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon green">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p><strong>Charts auto-refresh every 5 minutes</strong></p>
+                            <span class="activity-time">Or click refresh to update data manually</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon purple">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p><strong>Use keyboard shortcuts</strong></p>
+                            <span class="activity-time">Tab to navigate, Enter to submit forms</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon orange">
+                            <i class="fas fa-print"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p><strong>Print-friendly layouts</strong></p>
+                            <span class="activity-time">Press Ctrl+P or Cmd+P for optimized printing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 The Lariat Bible. Built with <i class="fas fa-heart"></i> for restaurant success.</p>
+        <div class="footer-links">
+            <a href="#help">Help</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/interactive.js"></script>
+    <script src="/static/js/advanced.js"></script>
+
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🛠️ Tools page loaded successfully');
+        });
+    </script>
+</body>
+</html>

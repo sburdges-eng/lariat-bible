@@ -40,6 +40,18 @@ def dashboard():
     return render_template('dashboard.html')
 
 
+@main_bp.route('/tools')
+def tools():
+    """
+    Advanced tools and features page.
+
+    Returns:
+        HTML page with advanced interactive tools
+    """
+    current_app.logger.info('Tools page accessed')
+    return render_template('tools.html')
+
+
 def get_dashboard_data():
     """
     Get dashboard data for API requests.
