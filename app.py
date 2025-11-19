@@ -6,6 +6,7 @@ Restaurant Management System Web Interface
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 import os
 from dotenv import load_dotenv
 from datetime import datetime
@@ -23,8 +24,16 @@ CORS(app)
 WIFI_CONFIG_FILE = 'data/wifi_config.json'
 PORTAL_CONFIG_FILE = 'data/portal_config.json'
 
-# Ensure data directory exists
+# File upload configuration
+UPLOAD_FOLDER = 'data/uploads'
+ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Ensure data directories exist
 os.makedirs('data', exist_ok=True)
+os.makedirs('data/uploads', exist_ok=True)
+os.makedirs('data/templates', exist_ok=True)
 
 # Import modules (when implemented)
 try:
@@ -32,6 +41,17 @@ try:
     vendor_comparator = VendorComparator()
 except ImportError:
     vendor_comparator = None
+
+try:
+    from modules.vendor_import import VendorImporter
+    vendor_importer = VendorImporter()
+except ImportError:
+    vendor_importer = None
+
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -397,6 +417,187 @@ def portal_connect():
         'success': True,
         'message': 'Connected to The Lariat Guest WiFi',
         'redirect': data.get('redirect', 'https://thelariat.com')
+    })
+
+# ============================================================================
+# VENDOR IMPORT ENDPOINTS
+# ============================================================================
+
+@app.route('/api/vendor/import/templates')
+def get_import_templates():
+    """Get list of available import templates"""
+    templates = []
+
+    if vendor_importer:
+        for vendor in ['SYSCO', 'SHAMROCK']:
+            template_path = vendor_importer.get_template_path(vendor)
+            templates.append({
+                'vendor': vendor,
+                'template_file': f'{vendor}_IMPORT_TEMPLATE.csv',
+                'schema_file': f'{vendor}_SCHEMA.json',
+                'download_url': f'/api/vendor/import/template/{vendor}'
+            })
+
+    return jsonify({
+        'templates': templates,
+        'supported_formats': ['CSV'],
+        'max_file_size_mb': 16
+    })
+
+@app.route('/api/vendor/import/template/<vendor>')
+def download_template(vendor):
+    """Download import template for specific vendor"""
+    vendor = vendor.upper()
+
+    if vendor not in ['SYSCO', 'SHAMROCK']:
+        return jsonify({'error': 'Invalid vendor'}), 400
+
+    template_file = f'{vendor}_IMPORT_TEMPLATE.csv'
+
+    try:
+        return send_from_directory('data/templates', template_file, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': 'Template file not found'}), 404
+
+@app.route('/api/vendor/import/upload', methods=['POST'])
+def upload_vendor_file():
+    """Upload vendor import file for processing"""
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['file']
+    vendor = request.form.get('vendor', '').upper()
+
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if vendor not in ['SYSCO', 'SHAMROCK']:
+        return jsonify({'error': 'Invalid vendor'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file type. Only CSV files allowed'}), 400
+
+    try:
+        # Save uploaded file
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        saved_filename = f'{vendor}_{timestamp}_{filename}'
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], saved_filename)
+        file.save(filepath)
+
+        # Validate the file
+        if vendor_importer:
+            validation = vendor_importer.validate_import_file(filepath, vendor)
+
+            return jsonify({
+                'success': True,
+                'message': 'File uploaded successfully',
+                'filename': saved_filename,
+                'filepath': filepath,
+                'validation': validation
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'File uploaded (importer module not available)',
+                'filename': saved_filename,
+                'filepath': filepath
+            })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/vendor/import/process', methods=['POST'])
+def process_vendor_import():
+    """Process uploaded vendor file and import products"""
+
+    data = request.get_json()
+    filepath = data.get('filepath')
+    vendor = data.get('vendor', '').upper()
+
+    if not filepath or not vendor:
+        return jsonify({'error': 'Missing filepath or vendor'}), 400
+
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+
+    if vendor_importer:
+        try:
+            # Import the products
+            if vendor == 'SYSCO':
+                result = vendor_importer.import_sysco_products(filepath)
+            elif vendor == 'SHAMROCK':
+                result = vendor_importer.import_shamrock_products(filepath)
+            else:
+                return jsonify({'error': 'Invalid vendor'}), 400
+
+            return jsonify({
+                'success': True,
+                'result': result
+            })
+
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    else:
+        return jsonify({'error': 'Vendor importer module not available'}), 503
+
+@app.route('/api/vendor/import/validate', methods=['POST'])
+def validate_vendor_import():
+    """Validate vendor import file without importing"""
+
+    data = request.get_json()
+    filepath = data.get('filepath')
+    vendor = data.get('vendor', '').upper()
+
+    if not filepath or not vendor:
+        return jsonify({'error': 'Missing filepath or vendor'}), 400
+
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+
+    if vendor_importer:
+        try:
+            validation = vendor_importer.validate_import_file(filepath, vendor)
+            return jsonify(validation)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Vendor importer module not available'}), 503
+
+@app.route('/api/vendor/import/history')
+def get_import_history():
+    """Get history of vendor imports"""
+
+    uploads_dir = app.config['UPLOAD_FOLDER']
+    history = []
+
+    if os.path.exists(uploads_dir):
+        for filename in os.listdir(uploads_dir):
+            if filename.endswith('.csv'):
+                filepath = os.path.join(uploads_dir, filename)
+                stat = os.stat(filepath)
+
+                # Parse filename to extract vendor and timestamp
+                parts = filename.split('_')
+                vendor = parts[0] if parts else 'Unknown'
+
+                history.append({
+                    'filename': filename,
+                    'vendor': vendor,
+                    'upload_date': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    'file_size': stat.st_size
+                })
+
+    # Sort by upload date (newest first)
+    history.sort(key=lambda x: x['upload_date'], reverse=True)
+
+    return jsonify({
+        'history': history,
+        'total_imports': len(history)
     })
 
 if __name__ == '__main__':

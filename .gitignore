@@ -87,6 +87,9 @@ data/invoices/processed/
 data/wifi_config.json
 data/portal_config.json
 
+# Vendor import uploads (may contain proprietary pricing data)
+data/uploads/
+
 # Temporary files
 tmp/
 temp/

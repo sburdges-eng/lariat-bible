@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SYSCO Product Import Schema",
+  "description": "Schema for importing SYSCO vendor product catalog data",
+  "type": "object",
+  "vendor": "SYSCO",
+  "version": "1.0.0",
+  "required": [
+    "sysco_product_code",
+    "product_name",
+    "category",
+    "pack_size",
+    "unit_of_measure",
+    "case_price"
+  ],
+  "properties": {
+    "sysco_product_code": {
+      "type": "string",
+      "description": "SYSCO internal product code",
+      "pattern": "^[0-9]{7}$",
+      "examples": ["8123456", "9123463"]
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Full product name",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand name",
+      "enum": [
+        "SYSCO Classic",
+        "SYSCO Imperial",
+        "SYSCO Fresh",
+        "SYSCO Supreme",
+        "SYSCO Reliance",
+        "SYSCO Natural",
+        "Other"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "description": "Primary product category",
+      "enum": [
+        "Spices & Seasonings",
+        "Meat & Poultry",
+        "Produce",
+        "Dairy",
+        "Frozen Foods",
+        "Condiments",
+        "Bakery",
+        "Beverages",
+        "Dry Goods",
+        "Seafood",
+        "Deli"
+      ]
+    },
+    "subcategory": {
+      "type": "string",
+      "description": "Product subcategory",
+      "maxLength": 100
+    },
+    "pack_size": {
+      "type": "string",
+      "description": "Package size description",
+      "examples": ["5 LB", "6/5 LB", "24 CT", "4 GAL"]
+    },
+    "unit_of_measure": {
+      "type": "string",
+      "description": "Unit of measure",
+      "enum": ["LB", "OZ", "KG", "EACH", "GAL", "QT", "PT", "L", "ML", "CT"]
+    },
+    "case_price": {
+      "type": "number",
+      "description": "Price per case in USD",
+      "minimum": 0,
+      "exclusiveMinimum": false
+    },
+    "unit_price": {
+      "type": "number",
+      "description": "Price per unit in USD",
+      "minimum": 0
+    },
+    "price_per_lb": {
+      "type": "number",
+      "description": "Price per pound in USD",
+      "minimum": 0
+    },
+    "price_per_oz": {
+      "type": "number",
+      "description": "Price per ounce in USD",
+      "minimum": 0
+    },
+    "each_weight_lb": {
+      "type": "number",
+      "description": "Weight of each unit in pounds",
+      "minimum": 0
+    },
+    "case_quantity": {
+      "type": "integer",
+      "description": "Number of units per case",
+      "minimum": 1
+    },
+    "vendor_sku": {
+      "type": "string",
+      "description": "SYSCO SKU identifier",
+      "pattern": "^SYS-[0-9]{7}$"
+    },
+    "upc_code": {
+      "type": "string",
+      "description": "Universal Product Code",
+      "pattern": "^[0-9]{12}$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed product description",
+      "maxLength": 500
+    },
+    "allergen_info": {
+      "type": "string",
+      "description": "Allergen information",
+      "examples": ["Contains: Milk, Eggs", "Contains: None"]
+    },
+    "storage_temp": {
+      "type": "string",
+      "description": "Required storage temperature",
+      "enum": ["Ambient", "Refrigerated", "Frozen"]
+    },
+    "shelf_life_days": {
+      "type": "integer",
+      "description": "Shelf life in days",
+      "minimum": 0,
+      "maximum": 3650
+    },
+    "country_of_origin": {
+      "type": "string",
+      "description": "Country where product originated",
+      "maxLength": 100
+    },
+    "kosher": {
+      "type": "string",
+      "description": "Kosher certified",
+      "enum": ["Y", "N"]
+    },
+    "organic": {
+      "type": "string",
+      "description": "USDA Organic certified",
+      "enum": ["Y", "N"]
+    },
+    "gluten_free": {
+      "type": "string",
+      "description": "Gluten-free certified",
+      "enum": ["Y", "N"]
+    },
+    "non_gmo": {
+      "type": "string",
+      "description": "Non-GMO verified",
+      "enum": ["Y", "N"]
+    },
+    "last_updated": {
+      "type": "string",
+      "description": "Last update date",
+      "format": "date"
+    }
+  },
+  "additionalProperties": false,
+  "import_notes": {
+    "file_format": "CSV",
+    "encoding": "UTF-8",
+    "delimiter": ",",
+    "header_row": true,
+    "date_format": "YYYY-MM-DD",
+    "decimal_separator": ".",
+    "validation_rules": [
+      "All monetary values must be positive",
+      "Product code must be unique",
+      "Case price must equal unit_price * case_quantity (within 0.01 tolerance)",
+      "If price_per_lb is provided, price_per_oz should equal price_per_lb / 16"
+    ]
+  }
+}
