@@ -1,0 +1,38 @@
+[
+  {
+    "item_code": "SYS001",
+    "description": "BEEF GROUND 80/20 FRESH",
+    "pack_size": "10 LB",
+    "case_price": 45.99,
+    "unit_price": 4.599,
+    "unit": "LB",
+    "category": "MEAT"
+  },
+  {
+    "item_code": "SYS002",
+    "description": "CHICKEN BREAST BONELESS SKINLESS",
+    "pack_size": "40 LB",
+    "case_price": 89.99,
+    "unit_price": 2.249,
+    "unit": "LB",
+    "category": "POULTRY"
+  },
+  {
+    "item_code": "SYS003",
+    "description": "PEPPER BLACK COARSE GRIND",
+    "pack_size": "6/1LB",
+    "case_price": 298.95,
+    "unit_price": 49.825,
+    "unit": "LB",
+    "category": "SPICES"
+  },
+  {
+    "item_code": "SYS004",
+    "description": "GARLIC POWDER",
+    "pack_size": "3/6LB",
+    "case_price": 213.19,
+    "unit_price": 11.84,
+    "unit": "LB",
+    "category": "SPICES"
+  }
+]

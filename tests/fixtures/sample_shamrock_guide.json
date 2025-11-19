@@ -1,0 +1,38 @@
+[
+  {
+    "item_code": "SHA001",
+    "description": "GROUND BEEF 80/20 FRESH",
+    "pack_size": "10 LB",
+    "case_price": 32.50,
+    "unit_price": 3.25,
+    "unit": "LB",
+    "category": "MEAT"
+  },
+  {
+    "item_code": "SHA002",
+    "description": "CHICKEN BREAST BONELESS SKINLESS",
+    "pack_size": "40 LB",
+    "case_price": 63.50,
+    "unit_price": 1.587,
+    "unit": "LB",
+    "category": "POULTRY"
+  },
+  {
+    "item_code": "SHA003",
+    "description": "PEPPER BLACK COARSE GRIND",
+    "pack_size": "25 LB",
+    "case_price": 79.71,
+    "unit_price": 3.19,
+    "unit": "LB",
+    "category": "SPICES"
+  },
+  {
+    "item_code": "SHA004",
+    "description": "GARLIC POWDER CALIFORNIA",
+    "pack_size": "1/6/LB",
+    "case_price": 54.26,
+    "unit_price": 9.04,
+    "unit": "LB",
+    "category": "SPICES"
+  }
+]
