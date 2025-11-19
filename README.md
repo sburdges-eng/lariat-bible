@@ -78,11 +78,23 @@ savings = comparator.compare_vendors('SYSCO', 'Shamrock Foods')
 print(f"Potential monthly savings: ${savings}")
 ```
 
+### Process Invoice Photos
+
+```bash
+# Process a single invoice photo
+python process_invoices.py -i data/invoices/invoice.jpg
+
+# Process all invoices in a directory
+python process_invoices.py -d data/invoices/raw/ -o data/invoices/processed/
+```
+
+See [INVOICE_OCR_GUIDE.md](INVOICE_OCR_GUIDE.md) for complete documentation.
+
 ## 📦 Modules Overview
 
 ### Vendor Analysis
 Automated price comparison between vendors with OCR invoice processing.
-- Invoice OCR and data extraction
+- **Invoice OCR** - Extract dates, items, prices, and distributor from photos
 - Price trend analysis
 - Savings opportunity identification
 
@@ -134,9 +146,9 @@ INVOICE_STORAGE_PATH=./data/invoices
 - [ ] Core utilities implementation
 
 ### Phase 2: Vendor Analysis
-- [ ] OCR pipeline for invoices
-- [ ] Price comparison engine
-- [ ] Savings report generator
+- [x] OCR pipeline for invoices
+- [x] Basic price comparison engine
+- [ ] Advanced savings report generator
 
 ### Phase 3: Inventory & Recipes
 - [ ] Inventory tracking system
