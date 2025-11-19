@@ -1,0 +1,12 @@
+#!/bin/bash
+# The Lariat Bible - macOS App Bundle Launcher
+
+# Get the directory where the app bundle is located
+BUNDLE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_DIR="$(dirname "$(dirname "$(dirname "$BUNDLE_DIR")")")"
+
+# Change to the lariat-bible directory
+cd "$APP_DIR"
+
+# Launch the Python desktop app (tkinter-based, no server)
+python3 lariat_desktop.py
