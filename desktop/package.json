@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "The Lariat Bible - Restaurant Recipe Costing System",
   "main": "main.js",
-  "author": "The Lariat",
+  "author": {
+    "name": "The Lariat",
+    "email": "info@thelariat.com"
+  },
+  "homepage": "https://thelariat.com",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -53,8 +57,9 @@
     },
     "linux": {
       "icon": "assets/icon.png",
-      "target": ["AppImage", "deb"],
-      "category": "Office"
+      "target": ["AppImage"],
+      "category": "Office",
+      "maintainer": "The Lariat <info@thelariat.com>"
     },
     "nsis": {
       "oneClick": false,
