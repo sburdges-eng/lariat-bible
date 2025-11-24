@@ -29,6 +29,7 @@ reportlab==4.0.7
 # API and Requests
 requests==2.31.0
 httpx==0.25.2
+beautifulsoup4==4.12.2  # HTML parsing for web scraping
 
 # Data Validation
 pydantic==2.5.2
