@@ -2,8 +2,10 @@
  * The Lariat Bible - Main App Component
  */
 
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import VendorImport from './pages/VendorImport';
@@ -13,6 +15,11 @@ import MenuItems from './pages/MenuItems';
 import Settings from './pages/Settings';
 
 const queryClient = new QueryClient();
+
+// Check if running in Electron
+const isElectron = () => {
+  return typeof window !== 'undefined' && window.electronAPI;
+};
 
 function Navigation() {
   const navItems = [
@@ -111,10 +118,79 @@ function Dashboard() {
   );
 }
 
+// Component to handle Electron IPC navigation
+function ElectronBridge() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isElectron()) return;
+
+    // Handle navigation from Electron menu
+    window.electronAPI.onNavigate((path) => {
+      const pathMap = {
+        '/': '/',
+        '/vendors': '/',
+        '/ingredients': '/ingredients',
+        '/recipes': '/recipes',
+        '/menu-items': '/menu',
+        '/settings': '/settings'
+      };
+      navigate(pathMap[path] || path);
+    });
+
+    // Handle actions from Electron menu
+    window.electronAPI.onAction(async (action) => {
+      switch (action) {
+        case 'cost-all':
+          toast.loading('Costing all recipes...');
+          try {
+            const res = await fetch('http://localhost:8000/api/recipes/cost-all', { method: 'POST' });
+            const data = await res.json();
+            toast.dismiss();
+            toast.success(`Costed ${data.costed || 0} recipes`);
+          } catch (err) {
+            toast.dismiss();
+            toast.error('Failed to cost recipes');
+          }
+          break;
+        case 'auto-link':
+          toast.loading('Auto-linking ingredients...');
+          try {
+            const res = await fetch('http://localhost:8000/api/ingredients/auto-link', { method: 'POST' });
+            const data = await res.json();
+            toast.dismiss();
+            toast.success(`Linked ${data.linked || 0} ingredients`);
+          } catch (err) {
+            toast.dismiss();
+            toast.error('Failed to auto-link');
+          }
+          break;
+      }
+    });
+
+    // Handle export from Electron menu
+    window.electronAPI.onExport((type) => {
+      const exportUrls = {
+        'costing-book': '/api/exports/costing-book',
+        'recipes': '/api/exports/recipes',
+        'ingredients': '/api/exports/ingredients',
+        'summary': '/api/exports/summary'
+      };
+      const url = exportUrls[type];
+      if (url) {
+        window.open(`http://localhost:8000${url}`, '_blank');
+      }
+    });
+  }, [navigate]);
+
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ElectronBridge />
         <div className="min-h-screen bg-gray-100">
           <Navigation />
           <main className="max-w-7xl mx-auto px-4 py-8">

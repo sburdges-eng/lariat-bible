@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="ropeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D2691E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B4513;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="250" fill="url(#bgGradient)" stroke="#D2691E" stroke-width="8"/>
+
+  <!-- Lariat rope loop -->
+  <ellipse cx="256" cy="220" rx="140" ry="120" fill="none" stroke="url(#ropeGradient)" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Rope tail going down -->
+  <path d="M 116 220 Q 100 280 120 340 Q 140 400 180 440 Q 200 460 220 470"
+        fill="none" stroke="url(#ropeGradient)" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Rope texture lines on loop -->
+  <ellipse cx="256" cy="220" rx="140" ry="120" fill="none" stroke="#A0522D" stroke-width="2" stroke-dasharray="8,12" opacity="0.5"/>
+
+  <!-- "The Lariat" text -->
+  <text x="256" y="500" text-anchor="middle" font-family="Georgia, serif" font-size="48" font-weight="bold" fill="#D2691E">
+    THE LARIAT
+  </text>
+
+  <!-- Small star accent -->
+  <polygon points="256,100 262,118 282,118 266,130 272,150 256,138 240,150 246,130 230,118 250,118" fill="#FFD700"/>
+</svg>
