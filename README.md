@@ -35,6 +35,10 @@ lariat-bible/
 │   ├── catering/          # Catering operations and quotes
 │   ├── maintenance/       # Equipment maintenance schedules
 │   └── reporting/         # Business intelligence and reports
+├── tools/                 # Utility scripts and tools
+│   └── media_scan.py     # Media file scanner (see docs/media_scan_guide.md)
+├── docs/                  # Guides and documentation
+│   └── media_scan_guide.md
 ├── web_interface/         # Web application frontend
 ├── data/                  # Data storage
 │   └── invoices/         # Invoice images and OCR data
@@ -115,6 +119,32 @@ Comprehensive business intelligence and analytics.
 - Daily/weekly/monthly sales reports
 - Labor cost analysis
 - Profit margin tracking
+
+## 🛠️ Tools
+
+### Media Scanner
+Offline utility for cataloging audio/video files with metadata extraction and duplicate detection.
+
+```bash
+# Basic usage
+python tools/media_scan.py /path/to/media
+
+# With custom output file
+python tools/media_scan.py /path/to/media -o inventory.csv
+
+# Verbose mode
+python tools/media_scan.py /path/to/media -v
+```
+
+Features:
+- Extracts metadata using ffprobe (duration, codec, resolution, bitrate)
+- Generates lightweight content hashes for duplicate detection
+- Writes results to CSV for analysis
+- Runs entirely offline - no data transmitted
+
+**Requires:** FFmpeg installed (`brew install ffmpeg` on macOS)
+
+See [Media Scanner Guide](docs/media_scan_guide.md) for full documentation.
 
 ## 🔧 Configuration
 
