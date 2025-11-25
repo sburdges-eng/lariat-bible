@@ -42,13 +42,30 @@ class LariatBible:
     
     def load_data(self):
         """Load all data from files if they exist"""
-        # This would load from JSON files or database
-        pass
-    
+        # Load menu items
+        menu_file = self.data_path / "menu_items.json"
+        if menu_file.exists():
+            try:
+                with open(menu_file, 'r') as f:
+                    menu_data = json.load(f)
+                for item_data in menu_data:
+                    # Remove computed 'margin' field if present (it's a property)
+                    item_data.pop('margin', None)
+                    menu_item = MenuItem.from_dict(item_data)
+                    self.menu_items[menu_item.item_id] = menu_item
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"Warning: Could not load menu items: {e}")
+
     def save_data(self):
         """Save all data to files"""
-        # This would save to JSON files or database
-        pass
+        # Ensure data directory exists
+        self.data_path.mkdir(parents=True, exist_ok=True)
+
+        # Save menu items
+        menu_file = self.data_path / "menu_items.json"
+        menu_data = [item.to_dict() for item in self.menu_items.values()]
+        with open(menu_file, 'w') as f:
+            json.dump(menu_data, f, indent=2, default=str)
     
     # ========== INGREDIENT MANAGEMENT ==========
     
