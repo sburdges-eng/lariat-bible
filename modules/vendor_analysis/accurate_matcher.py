@@ -561,15 +561,20 @@ if __name__ == "__main__":
     # Generate comparison
     df = matcher.generate_comparison_report()
 
-    # Save results
-    output_path = '/home/runner/work/lariat-bible/lariat-bible/data/matched_products_comparison.csv'
+    # Save results - use relative path
+    import os
+    output_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        'data',
+        'matched_products_comparison.csv'
+    )
     df.to_csv(output_path, index=False)
     print(f"\n✅ Saved matched products comparison to {output_path}")
 
     # Instructions for next steps
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("NEXT STEPS FOR ACCURATE COMPARISON:")
-    print("="*80)
+    print("=" * 80)
     print("1. Export your ACTUAL order guides from both vendors")
     print("2. Match products by BOTH name AND specification")
     print("3. Verify pack sizes are interpreted correctly")
