@@ -19,27 +19,36 @@ The Lariat Bible serves as the single source of truth for:
 - **Monthly Catering Revenue**: $28,000
 - **Monthly Restaurant Revenue**: $20,000
 - **Potential Annual Savings** (Shamrock vs SYSCO): $52,000
+- **Target Catering Margin**: 45%
 
 ## 🗂️ Project Structure
 
 ```
 lariat-bible/
-├── core/                   # Core functionality
-│   ├── database/          # Database models and connections
-│   ├── authentication/    # User authentication and permissions
-│   └── shared_utilities/  # Shared helper functions
-├── modules/               # Business logic modules
+├── modules/
 │   ├── vendor_analysis/   # Vendor price comparison and optimization
-│   ├── inventory/         # Stock management and tracking
-│   ├── recipes/           # Recipe management and costing
-│   ├── catering/          # Catering operations and quotes
-│   ├── maintenance/       # Equipment maintenance schedules
-│   └── reporting/         # Business intelligence and reports
-├── web_interface/         # Web application frontend
+│   │   ├── vendor_parser.py       # Parse SYSCO/Shamrock spreadsheets
+│   │   ├── accurate_matcher.py    # Fuzzy product matching
+│   │   ├── unit_converter.py      # Unit conversion utilities
+│   │   ├── report_generator.py    # Generate comparison reports
+│   │   └── comparator.py          # Price comparison logic
+│   ├── beo_integration/   # BEO file processing
+│   │   ├── beo_parser.py          # Parse BEO Excel files
+│   │   ├── order_calculator.py    # Calculate ingredient quantities
+│   │   └── prep_sheet_generator.py # Generate kitchen prep sheets
+│   ├── core/              # Core functionality
+│   │   ├── models.py              # Data models
+│   │   └── db.py                  # Database utilities
+│   ├── inventory/         # Stock management
+│   └── recipes/           # Recipe management
+├── scripts/
+│   └── vendor_cli.py      # CLI for vendor operations
 ├── data/                  # Data storage
-│   └── invoices/         # Invoice images and OCR data
-├── documentation/         # Additional documentation
-└── tests/                # Test suites
+│   ├── sample_sysco.xlsx  # Sample SYSCO data
+│   └── sample_shamrock.xlsx # Sample Shamrock data
+├── tests/                 # Test suites
+├── app.py                 # Flask web application
+└── requirements.txt       # Python dependencies
 ```
 
 ## 🚀 Quick Start
@@ -78,13 +87,111 @@ savings = comparator.compare_vendors('SYSCO', 'Shamrock Foods')
 print(f"Potential monthly savings: ${savings}")
 ```
 
+## 🔧 Vendor Comparison Feature
+
+### CLI Commands
+
+```bash
+# Parse SYSCO spreadsheet
+python -m scripts.vendor_cli parse sysco invoice.xlsx --output products.json
+
+# Parse Shamrock spreadsheet
+python -m scripts.vendor_cli parse shamrock order_guide.xlsx
+
+# Compare vendors (with input files)
+python -m scripts.vendor_cli compare --sysco sysco.xlsx --shamrock shamrock.xlsx --output report.csv
+
+# Compare vendors (sample data)
+python -m scripts.vendor_cli compare --output report.csv
+
+# Show savings summary
+python -m scripts.vendor_cli savings
+
+# Generate prep sheet from BEO
+python -m scripts.vendor_cli prep-sheet event.xlsx --output kitchen_prep.html
+```
+
+### API Endpoints
+
+Start the server:
+```bash
+python app.py
+```
+
+**Vendor Analysis Endpoints:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/vendor/upload` | POST | Upload vendor spreadsheet for parsing |
+| `/api/vendor/comparison` | GET | Get full comparison data |
+| `/api/vendor/savings` | GET | Get savings summary |
+
+**BEO Integration Endpoints:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/beo/parse` | POST | Parse uploaded BEO file |
+| `/api/beo/events` | GET | List all parsed events |
+| `/api/beo/prep-sheet/<event_id>` | GET | Generate prep sheet |
+
+**Example: Upload SYSCO File**
+```bash
+curl -X POST -F "file=@sysco_invoice.xlsx" -F "vendor=sysco" \
+  http://localhost:5000/api/vendor/upload
+```
+
+**Example: Get Comparison**
+```bash
+curl http://localhost:5000/api/vendor/comparison
+```
+
+**Example: Get Prep Sheet**
+```bash
+curl http://localhost:5000/api/beo/prep-sheet/BEO-2024-001?format=html
+```
+
+### Python API
+
+```python
+from modules.vendor_analysis import VendorParser, AccurateVendorMatcher, ReportGenerator
+
+# Parse vendor files
+parser = VendorParser()
+sysco_products = parser.parse_sysco('sysco_invoice.xlsx')
+shamrock_products = parser.parse_shamrock('shamrock_order.xlsx')
+
+# Match products
+matcher = AccurateVendorMatcher()
+matched, sysco_only, shamrock_only = matcher.fuzzy_match_products(
+    sysco_products,
+    shamrock_products,
+    min_confidence=0.6
+)
+
+# Generate report
+generator = ReportGenerator()
+generator.set_data(matched, sysco_only, shamrock_only)
+generator.generate_csv_report('comparison.csv')
+print(generator.generate_text_report())
+```
+
 ## 📦 Modules Overview
 
 ### Vendor Analysis
-Automated price comparison between vendors with OCR invoice processing.
-- Invoice OCR and data extraction
-- Price trend analysis
-- Savings opportunity identification
+Automated price comparison between vendors.
+- Parse SYSCO and Shamrock spreadsheets
+- Fuzzy product name matching with confidence scoring
+- Unit normalization (oz to lb, cases to units)
+- Brand-aware matching
+- Generate comparison reports (JSON, CSV, text)
+- Calculate margin impact
+
+### BEO Integration
+Process Banquet Event Order files.
+- Parse BEO Excel files from BEO-Master format
+- Calculate ingredient quantities based on guest count
+- Generate kitchen prep sheets (text/HTML)
+- Recipe-based ingredient calculation
 
 ### Inventory Management
 Real-time inventory tracking and automated reordering.
@@ -104,18 +211,6 @@ Streamlined catering workflow from quote to execution.
 - Event planning tools
 - Profit margin calculator (Target: 45%)
 
-### Maintenance Tracking
-Equipment maintenance scheduling and history.
-- Preventive maintenance schedules
-- Repair history logging
-- Vendor contact management
-
-### Reporting Dashboard
-Comprehensive business intelligence and analytics.
-- Daily/weekly/monthly sales reports
-- Labor cost analysis
-- Profit margin tracking
-
 ## 🔧 Configuration
 
 Copy `.env.example` to `.env` and configure:
@@ -128,25 +223,40 @@ INVOICE_STORAGE_PATH=./data/invoices
 
 ## 📈 Development Roadmap
 
-### Phase 1: Foundation (Current)
+### Phase 1: Foundation ✅
 - [x] Project structure setup
-- [ ] Database schema design
-- [ ] Core utilities implementation
+- [x] Core data models
+- [x] Database utilities
 
-### Phase 2: Vendor Analysis
-- [ ] OCR pipeline for invoices
-- [ ] Price comparison engine
-- [ ] Savings report generator
+### Phase 2: Vendor Analysis ✅
+- [x] Vendor spreadsheet parser
+- [x] Product matching engine
+- [x] Price comparison engine
+- [x] Report generator
+- [x] CLI interface
+- [x] API endpoints
 
-### Phase 3: Inventory & Recipes
+### Phase 3: BEO Integration ✅
+- [x] BEO file parser
+- [x] Ingredient calculator
+- [x] Prep sheet generator
+
+### Phase 4: Inventory & Recipes
 - [ ] Inventory tracking system
 - [ ] Recipe database
 - [ ] Cost calculation engine
 
-### Phase 4: Web Interface
+### Phase 5: Web Interface
 - [ ] Dashboard creation
 - [ ] Mobile-responsive design
 - [ ] Real-time updates
+
+## 🧪 Testing
+
+Run tests:
+```bash
+python -m pytest tests/ -v
+```
 
 ## 🤝 Contributing
 
