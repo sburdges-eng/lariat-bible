@@ -78,41 +78,45 @@ class VendorCSVProcessor:
             
         pack_str = str(pack_str).upper().strip()
         
-        # Shamrock format: 1/6/LB = 1 container × 6 lbs
-        if '/LB' in pack_str:
-            parts = pack_str.replace('/LB', '').split('/')
-            if len(parts) == 2:
-                try:
-                    return float(parts[0]) * float(parts[1])
-                except ValueError:
-                    pass
+        # Shamrock format: 1/6/LB = 1 container × 6 lbs (has /LB with two slashes)
+        shamrock_match = re.match(r'^(\d+)/(\d+)/LB$', pack_str)
+        if shamrock_match:
+            try:
+                return float(shamrock_match.group(1)) * float(shamrock_match.group(2))
+            except ValueError:
+                pass
         
-        # Sysco format: 3/6LB or 6/1LB = containers × pounds each
-        if 'LB' in pack_str and '/' in pack_str:
-            parts = pack_str.replace('LB', '').replace('#', '').split('/')
-            if len(parts) == 2:
-                try:
-                    return float(parts[0]) * float(parts[1])
-                except ValueError:
-                    pass
+        # Sysco format: 3/6LB or 6/1LB = containers × pounds each (single slash followed by number+LB)
+        sysco_match = re.match(r'^(\d+)/(\d+)LB$', pack_str)
+        if sysco_match:
+            try:
+                return float(sysco_match.group(1)) * float(sysco_match.group(2))
+            except ValueError:
+                pass
         
-        # Simple: 25 LB
-        if 'LB' in pack_str:
-            match = re.search(r'(\d+\.?\d*)\s*LB', pack_str)
-            if match:
-                try:
-                    return float(match.group(1))
-                except ValueError:
-                    pass
+        # Simple: 25 LB or 25LB
+        simple_match = re.match(r'^(\d+\.?\d*)\s*LB$', pack_str)
+        if simple_match:
+            try:
+                return float(simple_match.group(1))
+            except ValueError:
+                pass
         
         # Handle # sign for pounds: 25#, 10#
-        if '#' in pack_str:
-            match = re.search(r'(\d+\.?\d*)\s*#', pack_str)
-            if match:
-                try:
-                    return float(match.group(1))
-                except ValueError:
-                    pass
+        pound_sign_match = re.match(r'^(\d+\.?\d*)\s*#$', pack_str)
+        if pound_sign_match:
+            try:
+                return float(pound_sign_match.group(1))
+            except ValueError:
+                pass
+        
+        # Sysco format with #: 6/1# 
+        sysco_pound_match = re.match(r'^(\d+)/(\d+)#$', pack_str)
+        if sysco_pound_match:
+            try:
+                return float(sysco_pound_match.group(1)) * float(sysco_pound_match.group(2))
+            except ValueError:
+                pass
         
         return None
     
@@ -149,13 +153,16 @@ class VendorCSVProcessor:
         desc = ' '.join(desc.split())
         return desc
     
-    def load_shamrock_csv(self, file_path: str) -> pd.DataFrame:
-        """Load and normalize Shamrock Foods CSV."""
-        df = pd.read_csv(file_path)
-        normalized = self._normalize_columns(df, self.shamrock_columns)
+    def _process_vendor_data(self, df: pd.DataFrame, column_mapping: Dict[str, List[str]], 
+                              vendor_name: str) -> pd.DataFrame:
+        """
+        Process vendor data: normalize columns, parse pack sizes, calculate prices.
+        Shared logic for all vendor data loading methods.
+        """
+        normalized = self._normalize_columns(df, column_mapping)
         
         # Add vendor identifier
-        normalized['vendor'] = 'Shamrock'
+        normalized['vendor'] = vendor_name
         
         # Parse pack size to pounds
         normalized['total_pounds'] = normalized['pack_size'].apply(self._parse_pack_size)
@@ -170,58 +177,31 @@ class VendorCSVProcessor:
         # Normalize descriptions for matching
         normalized['normalized_desc'] = normalized['description'].apply(self._normalize_description)
         
+        return normalized
+    
+    def load_shamrock_csv(self, file_path: str) -> pd.DataFrame:
+        """Load and normalize Shamrock Foods CSV."""
+        df = pd.read_csv(file_path)
+        normalized = self._process_vendor_data(df, self.shamrock_columns, 'Shamrock')
         self.shamrock_data = normalized
         return normalized
     
     def load_sysco_csv(self, file_path: str) -> pd.DataFrame:
         """Load and normalize Sysco CSV."""
         df = pd.read_csv(file_path)
-        normalized = self._normalize_columns(df, self.sysco_columns)
-        
-        # Add vendor identifier
-        normalized['vendor'] = 'Sysco'
-        
-        # Parse pack size to pounds
-        normalized['total_pounds'] = normalized['pack_size'].apply(self._parse_pack_size)
-        
-        # Calculate price per pound
-        normalized['price_per_lb'] = np.where(
-            normalized['total_pounds'] > 0,
-            normalized['price'] / normalized['total_pounds'],
-            None
-        )
-        
-        # Normalize descriptions for matching
-        normalized['normalized_desc'] = normalized['description'].apply(self._normalize_description)
-        
+        normalized = self._process_vendor_data(df, self.sysco_columns, 'Sysco')
         self.sysco_data = normalized
         return normalized
     
     def load_shamrock_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Load Shamrock data from a DataFrame (for API use)."""
-        normalized = self._normalize_columns(df, self.shamrock_columns)
-        normalized['vendor'] = 'Shamrock'
-        normalized['total_pounds'] = normalized['pack_size'].apply(self._parse_pack_size)
-        normalized['price_per_lb'] = np.where(
-            normalized['total_pounds'] > 0,
-            normalized['price'] / normalized['total_pounds'],
-            None
-        )
-        normalized['normalized_desc'] = normalized['description'].apply(self._normalize_description)
+        normalized = self._process_vendor_data(df, self.shamrock_columns, 'Shamrock')
         self.shamrock_data = normalized
         return normalized
     
     def load_sysco_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Load Sysco data from a DataFrame (for API use)."""
-        normalized = self._normalize_columns(df, self.sysco_columns)
-        normalized['vendor'] = 'Sysco'
-        normalized['total_pounds'] = normalized['pack_size'].apply(self._parse_pack_size)
-        normalized['price_per_lb'] = np.where(
-            normalized['total_pounds'] > 0,
-            normalized['price'] / normalized['total_pounds'],
-            None
-        )
-        normalized['normalized_desc'] = normalized['description'].apply(self._normalize_description)
+        normalized = self._process_vendor_data(df, self.sysco_columns, 'Sysco')
         self.sysco_data = normalized
         return normalized
     
@@ -369,18 +349,36 @@ class VendorCSVProcessor:
             best_prices.to_excel(writer, sheet_name='Best Prices', index=False)
             
             # Sheet 2: Shamrock More Expensive
-            shamrock_expensive = self.combined_data[
-                self.combined_data['cheaper_vendor'] == 'Sysco'
-            ][[
+            shamrock_expensive_filter = self.combined_data['cheaper_vendor'] == 'Sysco'
+            shamrock_expensive = self.combined_data[shamrock_expensive_filter][[
                 'shamrock_description',
                 'shamrock_price_per_lb',
                 'sysco_price_per_lb',
-                'savings_per_lb',
-                'savings_percent',
                 'shamrock_pack_size',
                 'sysco_pack_size',
                 'category'
             ]].copy()
+            
+            # Calculate difference directly: Shamrock - Sysco (positive = Shamrock costs more)
+            shamrock_expensive['difference_per_lb'] = (
+                shamrock_expensive['shamrock_price_per_lb'] - shamrock_expensive['sysco_price_per_lb']
+            )
+            shamrock_expensive['difference_percent'] = np.where(
+                shamrock_expensive['shamrock_price_per_lb'] > 0,
+                (shamrock_expensive['difference_per_lb'] / shamrock_expensive['shamrock_price_per_lb']) * 100,
+                0
+            )
+            
+            shamrock_expensive = shamrock_expensive[[
+                'shamrock_description',
+                'shamrock_price_per_lb',
+                'sysco_price_per_lb',
+                'difference_per_lb',
+                'difference_percent',
+                'shamrock_pack_size',
+                'sysco_pack_size',
+                'category'
+            ]]
             shamrock_expensive.columns = [
                 'Product',
                 'Shamrock Price/LB',
@@ -391,9 +389,6 @@ class VendorCSVProcessor:
                 'Sysco Pack',
                 'Category'
             ]
-            # Invert the sign for Shamrock expensive items
-            shamrock_expensive['Difference/LB'] = shamrock_expensive['Difference/LB'].abs()
-            shamrock_expensive['Difference %'] = shamrock_expensive['Difference %'].abs()
             shamrock_expensive = shamrock_expensive.sort_values('Difference %', ascending=False)
             shamrock_expensive.to_excel(writer, sheet_name='Shamrock More Expensive', index=False)
             
@@ -459,6 +454,29 @@ class VendorCSVProcessor:
             all_products.to_excel(writer, sheet_name='All Matched Products', index=False)
             
             # Sheet 5: Summary Statistics
+            # Pre-calculate filtered data for readability
+            shamrock_cheaper = self.combined_data[
+                self.combined_data['cheaper_vendor'] == 'Shamrock'
+            ]
+            sysco_cheaper = self.combined_data[
+                self.combined_data['cheaper_vendor'] == 'Sysco'
+            ]
+            same_price = self.combined_data[
+                self.combined_data['cheaper_vendor'] == 'Same'
+            ]
+            
+            # Calculate averages with readable formatting
+            shamrock_avg_savings = (
+                f"{shamrock_cheaper['savings_percent'].mean():.2f}%"
+                if len(shamrock_cheaper) > 0 else 'N/A'
+            )
+            sysco_avg_savings = (
+                f"{abs(sysco_cheaper['savings_percent']).mean():.2f}%"
+                if len(sysco_cheaper) > 0 else 'N/A'
+            )
+            shamrock_total_savings = f"${shamrock_cheaper['savings_per_lb'].sum():.2f}"
+            sysco_total_savings = f"${abs(sysco_cheaper['savings_per_lb']).sum():.2f}"
+            
             summary_data = {
                 'Metric': [
                     'Total Products Matched',
@@ -473,13 +491,13 @@ class VendorCSVProcessor:
                 ],
                 'Value': [
                     len(self.combined_data),
-                    len(self.combined_data[self.combined_data['cheaper_vendor'] == 'Shamrock']),
-                    len(self.combined_data[self.combined_data['cheaper_vendor'] == 'Sysco']),
-                    len(self.combined_data[self.combined_data['cheaper_vendor'] == 'Same']),
-                    f"{self.combined_data[self.combined_data['cheaper_vendor'] == 'Shamrock']['savings_percent'].mean():.2f}%" if len(self.combined_data[self.combined_data['cheaper_vendor'] == 'Shamrock']) > 0 else 'N/A',
-                    f"{abs(self.combined_data[self.combined_data['cheaper_vendor'] == 'Sysco']['savings_percent']).mean():.2f}%" if len(self.combined_data[self.combined_data['cheaper_vendor'] == 'Sysco']) > 0 else 'N/A',
-                    f"${self.combined_data[self.combined_data['cheaper_vendor'] == 'Shamrock']['savings_per_lb'].sum():.2f}",
-                    f"${abs(self.combined_data[self.combined_data['cheaper_vendor'] == 'Sysco']['savings_per_lb']).sum():.2f}",
+                    len(shamrock_cheaper),
+                    len(sysco_cheaper),
+                    len(same_price),
+                    shamrock_avg_savings,
+                    sysco_avg_savings,
+                    shamrock_total_savings,
+                    sysco_total_savings,
                     datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 ]
             }

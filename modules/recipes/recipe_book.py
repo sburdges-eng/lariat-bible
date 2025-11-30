@@ -83,8 +83,8 @@ class UnifiedRecipe:
     
     # Metadata
     created_by: str = ""
-    created_date: datetime = field(default_factory=datetime.now)
-    last_modified: datetime = field(default_factory=datetime.now)
+    created_date: datetime = field(default_factory=lambda: datetime.now())
+    last_modified: datetime = field(default_factory=lambda: datetime.now())
     version: str = "1.0"
     
     @property

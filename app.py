@@ -190,9 +190,15 @@ def upload_vendor_csvs():
         # Get match threshold from form or use default
         match_threshold = float(request.form.get('match_threshold', 0.6))
         
-        # Read CSV files into DataFrames
-        shamrock_df = pd.read_csv(shamrock_file)
-        sysco_df = pd.read_csv(sysco_file)
+        # Read CSV files into DataFrames with row limit for security
+        # Limit to 10000 rows to prevent memory exhaustion
+        MAX_ROWS = 10000
+        shamrock_df = pd.read_csv(shamrock_file, nrows=MAX_ROWS)
+        sysco_df = pd.read_csv(sysco_file, nrows=MAX_ROWS)
+        
+        # Validate that we got valid data
+        if shamrock_df.empty or sysco_df.empty:
+            return jsonify({'error': 'One or both CSV files are empty'}), 400
         
         # Load into processor
         csv_processor.load_shamrock_dataframe(shamrock_df)
@@ -228,6 +234,10 @@ def upload_vendor_csvs():
             'timestamp': datetime.now().isoformat()
         })
         
+    except pd.errors.EmptyDataError:
+        return jsonify({'error': 'One or both CSV files are empty or invalid'}), 400
+    except pd.errors.ParserError as e:
+        return jsonify({'error': f'CSV parsing error: {str(e)}'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -236,13 +246,22 @@ def upload_vendor_csvs():
 def download_file(filename):
     """Download generated files."""
     safe_filename = secure_filename(filename)
-    file_path = os.path.join(os.path.dirname(__file__), 'data', safe_filename)
     
-    if not os.path.exists(file_path):
+    # Use pathlib to ensure path stays within data directory
+    data_dir = Path(os.path.dirname(__file__)) / 'data'
+    file_path = (data_dir / safe_filename).resolve()
+    
+    # Security check: ensure resolved path is still within data directory
+    try:
+        file_path.relative_to(data_dir.resolve())
+    except ValueError:
+        return jsonify({'error': 'Invalid file path'}), 400
+    
+    if not file_path.exists():
         return jsonify({'error': 'File not found'}), 404
     
     return send_file(
-        file_path,
+        str(file_path),
         as_attachment=True,
         download_name=safe_filename
     )
