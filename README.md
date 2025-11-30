@@ -70,30 +70,124 @@ python setup.py
 ### Basic Usage
 
 ```python
-# Example: Vendor price comparison
-from modules.vendor_analysis import VendorComparator
+# Example: Upload vendor CSVs and generate comparison Excel
+from modules.vendor_analysis import VendorCSVProcessor
+import pandas as pd
 
-comparator = VendorComparator()
-savings = comparator.compare_vendors('SYSCO', 'Shamrock Foods')
-print(f"Potential monthly savings: ${savings}")
+processor = VendorCSVProcessor()
+
+# Load your vendor CSVs
+shamrock_df = pd.read_csv('shamrock_order_guide.csv')
+sysco_df = pd.read_csv('sysco_order_guide.csv')
+
+processor.load_shamrock_dataframe(shamrock_df)
+processor.load_sysco_dataframe(sysco_df)
+
+# Generate comparison Excel with multiple sheets
+combined = processor.combine_vendor_data()
+excel_path = processor.generate_comparison_excel('vendor_comparison.xlsx')
+print(f"Comparison saved to: {excel_path}")
+
+# Get summary statistics
+stats = processor.get_summary_stats()
+print(f"Products matched: {stats['total_matched']}")
+print(f"Shamrock cheaper: {stats['shamrock_cheaper_count']}")
+print(f"Sysco cheaper: {stats['sysco_cheaper_count']}")
+```
+
+```python
+# Example: Create unified recipe book
+from modules.recipes import UnifiedRecipeBook, UnifiedRecipe
+
+book = UnifiedRecipeBook()
+
+# Create a recipe
+recipe = UnifiedRecipe(
+    recipe_id='LARIAT001',
+    name='House Blackened Chicken',
+    category='Entree',
+    yield_quantity=10,
+    yield_unit='portions'
+)
+
+# Add ingredients
+recipe.add_ingredient('Chicken Breast', 3.75, 'lb', cost=8.50)
+recipe.add_ingredient('Blackening Spice', 2, 'tbsp', cost=0.50)
+
+# Add instructions
+recipe.cooking_instructions = [
+    'Heat cast iron until smoking',
+    'Cook chicken 4-5 minutes per side'
+]
+
+# Calculate cost and add to book
+recipe.calculate_cost()
+book.add_recipe(recipe)
+
+# Export to Excel with all sheets
+excel_path = book.export_to_excel('recipe_book.xlsx')
+```
+
+## 🌐 API Endpoints
+
+### Vendor CSV Upload
+```bash
+# Upload vendor CSVs and generate comparison Excel
+POST /api/upload-vendor-csvs
+Content-Type: multipart/form-data
+
+# Form fields:
+# - shamrock_csv: Shamrock Foods CSV file
+# - sysco_csv: Sysco CSV file
+# - match_threshold (optional): 0.6 default
+
+# Response includes download link for Excel file
+```
+
+### Recipe Management
+```bash
+# List all recipes
+GET /api/recipes
+
+# Get specific recipe
+GET /api/recipes/<recipe_id>
+
+# Create new recipe
+POST /api/recipes
+Content-Type: application/json
+
+# Export to Excel
+GET /api/recipes/export/excel
+```
+
+### Download Files
+```bash
+# Download generated files
+GET /api/download/<filename>
 ```
 
 ## 📦 Modules Overview
 
-### Vendor Analysis
-Automated price comparison between vendors with OCR invoice processing.
+### Vendor Analysis & CSV Upload
+Automated price comparison between vendors with CSV upload and Excel report generation.
+- **Upload vendor CSVs**: Upload original Shamrock and Sysco CSVs directly
+- **Automatic matching**: Products are automatically matched between vendors
+- **Multi-sheet Excel report**: Generates Excel with sheets for:
+  - Best Prices (cheapest option for each product)
+  - Shamrock More Expensive items
+  - Sysco More Expensive items
+  - All Matched Products
+  - Summary Statistics
 - Invoice OCR and data extraction
 - Price trend analysis
 - Savings opportunity identification
 
-### Inventory Management
-Real-time inventory tracking and automated reordering.
-- Stock level monitoring
-- Expiration date tracking
-- Automated purchase order generation
-
-### Recipe Management
-Standardized recipes with automatic cost calculation.
+### Recipe Management & Unified Recipe Book
+Standardized recipes with automatic cost calculation and unified format.
+- **Unified recipe format**: Consistent structure for all recipes
+- **Total yields**: Yield quantities and portion sizes
+- **Complete instructions**: Prep, cooking, and plating instructions
+- **Multi-sheet Excel export**: Recipe Index, Full Recipes, Ingredients Master, Category Summary
 - Recipe scaling for different serving sizes
 - Ingredient cost tracking
 - Margin analysis
@@ -128,22 +222,29 @@ INVOICE_STORAGE_PATH=./data/invoices
 
 ## 📈 Development Roadmap
 
-### Phase 1: Foundation (Current)
+### Phase 1: Foundation ✅
 - [x] Project structure setup
-- [ ] Database schema design
-- [ ] Core utilities implementation
+- [x] Core utilities implementation
+- [x] Vendor CSV upload and comparison
+- [x] Unified recipe book format
 
-### Phase 2: Vendor Analysis
+### Phase 2: Vendor Analysis ✅
+- [x] CSV upload for Shamrock and Sysco
+- [x] Automatic product matching
+- [x] Multi-sheet Excel comparison reports
+- [x] Price per unit calculations
 - [ ] OCR pipeline for invoices
-- [ ] Price comparison engine
-- [ ] Savings report generator
 
-### Phase 3: Inventory & Recipes
+### Phase 3: Inventory & Recipes ✅
+- [x] Unified recipe format with yields
+- [x] Complete instructions (prep, cooking, plating)
+- [x] Multi-sheet recipe book export
+- [x] Ingredient cost tracking
 - [ ] Inventory tracking system
-- [ ] Recipe database
-- [ ] Cost calculation engine
 
 ### Phase 4: Web Interface
+- [x] REST API endpoints
+- [x] File upload support
 - [ ] Dashboard creation
 - [ ] Mobile-responsive design
 - [ ] Real-time updates

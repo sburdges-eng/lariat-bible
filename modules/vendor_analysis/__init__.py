@@ -7,6 +7,7 @@ Components:
 - InvoiceProcessor: Parse and process vendor invoices
 - AccurateVendorMatcher: Match products between vendors with specification awareness
 - CorrectedVendorComparison: Pack size parsing and unit conversion
+- VendorCSVProcessor: Upload and combine vendor CSVs, generate comparison Excel
 - Models: Data structures for vendors, products, and price history
 """
 
@@ -14,6 +15,7 @@ from .comparator import VendorComparator
 from .invoice_processor import InvoiceProcessor, Invoice, InvoiceLineItem
 from .accurate_matcher import AccurateVendorMatcher, ProductMatch
 from .corrected_comparison import CorrectedVendorComparison
+from .csv_processor import VendorCSVProcessor
 from .models import (
     Vendor,
     VendorTier,
@@ -40,6 +42,9 @@ __all__ = [
     
     # Price calculations
     'CorrectedVendorComparison',
+    
+    # CSV processing
+    'VendorCSVProcessor',
     
     # Data models
     'Vendor',

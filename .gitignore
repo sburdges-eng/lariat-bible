@@ -104,3 +104,9 @@ reports/*.pdf
 !data/invoices/.gitkeep
 !reports/.gitkeep
 !logs/.gitkeep
+
+# Generated comparison files
+data/*.xlsx
+data/*.json
+data/uploads/
+!data/uploads/.gitkeep
